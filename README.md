@@ -80,9 +80,9 @@ The system uses **LangChain agents** backed by Groq-hosted LLMs to reason over r
 
   
 
-- **Backend API:** [ResearchMind - Backend (Render)](https://your-backend.onrender.com)
+- **Backend API:** [ResearchMind - Backend (Render)](https://ai-research-system-x046.onrender.com/)
 
-- **Frontend:** [ResearchMind - Frontend (Streamlit)](https://your-frontend.streamlit.app)
+- **Frontend:** [ResearchMind - Frontend (Streamlit)](https://ai-research-system-jhb7jlklgmucvhtmptz5dm.streamlit.app/)
 
   
 
@@ -172,9 +172,8 @@ The system uses **LangChain agents** backed by Groq-hosted LLMs to reason over r
 
 ### Step 1 — Search Agent
 
-  
 
-- LangChain agent backed by `meta-llama/llama-4-scout-17b-16e-instruct` via Groq
+- LangChain agent backed by a Groq-hosted LLM, configurable via `agents.py`
 
 - Uses the `web_search` tool powered by Tavily (`max_results=3`)
 
@@ -673,7 +672,7 @@ pytest tests/test_auth.py  # auth tests only
 
 - LangChain + LangGraph
 
-- Groq Inference API (`meta-llama/llama-4-scout-17b-16e-instruct`)
+- Groq Inference API 
 
 - Tavily Search API
 
