@@ -1,0 +1,20 @@
+global:
+  # How frequently Prometheus scrapes all targets by default
+  scrape_interval: 15s
+  # How frequently Prometheus evaluates alerting rules (not used here, but good practice to set)
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  # Prometheus scraping itself — useful for monitoring the monitoring system
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Your FastAPI app — the /metrics endpoint is exposed by prometheus-fastapi-instrumentator
+  # If running locally (no Docker): target is localhost:8000
+  # If running in Docker Compose later: replace with your service name e.g. backend:8000
+  - job_name: "research_agent_api"
+    static_configs:
+      - targets: ["localhost:8000"]
+    metrics_path: "/metrics"
