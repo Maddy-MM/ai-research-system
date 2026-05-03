@@ -19,7 +19,11 @@ llm = ChatGroq(
 )
 
 def build_search_agent():
-    return create_agent(model=llm, tools=[web_search])
+    return create_agent(
+        model=llm,
+        tools=[web_search],
+        system_prompt="You are a research assistant. You MUST call the 'web_search' tool to find information. Never answer from your own knowledge. Always use the tool first before responding.",
+    )
 
 
 def build_reader_agent():
