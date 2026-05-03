@@ -14,7 +14,8 @@ settings = get_settings()
 # ---------------------------------------------------------------------------
 llm = ChatGroq(
     # model="meta-llama/llama-4-scout-17b-16e-instruct",
-    model="llama-3.3-70b-versatile",
+    # model="llama-3.3-70b-versatile",
+    model="qwen/qwen3-32b",
     temperature=0,
     api_key=settings.GROQ_API_KEY,
 )
