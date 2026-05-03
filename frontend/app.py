@@ -9,8 +9,7 @@ API_URL = "https://ai-research-system-x046.onrender.com/"
 st.set_page_config(
     page_title="ResearchMind",
     page_icon="🔬",
-    layout="centered",
-    initial_sidebar_state="expanded"
+    layout="centered"
 )
 
 # ---------------------------------------------------------------------------
