@@ -1,4 +1,5 @@
 import time
+import re
 
 from src.logging import get_logger
 from src.metrics import (
@@ -10,6 +11,9 @@ from src.pipeline.agents import build_search_agent, build_reader_agent, writer_c
 
 logger = get_logger(__name__)
 
+def strip_thinking(text: str) -> str:
+    # Remove <think>...</think> blocks if present (e.g., in Qwen3 models)
+    return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
 
 def run_research_pipeline(topic: str, request_id: str) -> dict:
     state = {}
@@ -26,7 +30,7 @@ def run_research_pipeline(topic: str, request_id: str) -> dict:
     search_result = search_agent.invoke({
         "messages": [("user", f"Find recent, reliable and detailed information about: {topic}")]
     })
-    state["search_results"] = search_result["messages"][-1].content
+    state["search_results"] = strip_thinking(search_result["messages"][-1].content)
 
     step_duration = time.perf_counter() - step_start
     PIPELINE_STEP_DURATION_SECONDS.labels(step="search").observe(step_duration)
@@ -46,7 +50,7 @@ def run_research_pipeline(topic: str, request_id: str) -> dict:
             f"Search Results:\n{state['search_results'][:800]}"
         )]
     })
-    state["scraped_content"] = reader_result["messages"][-1].content
+    state["scraped_content"] = strip_thinking(reader_result["messages"][-1].content)
 
     step_duration = time.perf_counter() - step_start
     PIPELINE_STEP_DURATION_SECONDS.labels(step="scrape").observe(step_duration)
@@ -62,10 +66,10 @@ def run_research_pipeline(topic: str, request_id: str) -> dict:
         f"SEARCH RESULTS:\n{state['search_results']}\n\n"
         f"DETAILED SCRAPED CONTENT:\n{state['scraped_content']}"
     )
-    state["report"] = writer_chain.invoke({
+    state["report"] = strip_thinking(writer_chain.invoke({
         "topic": topic,
         "research": research_combined,
-    })
+    }))
 
     step_duration = time.perf_counter() - step_start
     PIPELINE_STEP_DURATION_SECONDS.labels(step="write").observe(step_duration)
@@ -77,9 +81,9 @@ def run_research_pipeline(topic: str, request_id: str) -> dict:
     logger.info("Step 4: Critic starting", extra={"request_id": request_id})
     step_start = time.perf_counter()
 
-    state["feedback"] = critic_chain.invoke({
+    state["feedback"] = strip_thinking(critic_chain.invoke({
         "report": state["report"],
-    })
+    }))
 
     step_duration = time.perf_counter() - step_start
     PIPELINE_STEP_DURATION_SECONDS.labels(step="critique").observe(step_duration)

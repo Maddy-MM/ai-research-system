@@ -17,8 +17,7 @@ llm = ChatGroq(
     # model="llama-3.3-70b-versatile",
     model="qwen/qwen3-32b",
     temperature=0,
-    api_key=settings.GROQ_API_KEY,
-    model_kwargs={"thinking": {"type": "disabled"}}
+    api_key=settings.GROQ_API_KEY
 )
 
 def build_search_agent():
