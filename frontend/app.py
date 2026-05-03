@@ -3,13 +3,14 @@ import requests
 import threading
 import time
 
-API_URL = "https://ai-research-system-x046.onrender.com/"  # replace with your Render URL
-# API_URL = "http://127.0.0.1:8000"             # uncomment for local dev
+API_URL = "https://ai-research-system-x046.onrender.com/"  
+# API_URL = "http://127.0.0.1:8000"             
 
 st.set_page_config(
     page_title="ResearchMind",
     page_icon="🔬",
     layout="centered",
+    initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------------------------------
