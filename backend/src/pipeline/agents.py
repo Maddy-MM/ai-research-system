@@ -13,7 +13,8 @@ settings = get_settings()
 # LLM is instantiated once at module level. All agents and chains share it.
 # ---------------------------------------------------------------------------
 llm = ChatGroq(
-    model="meta-llama/llama-4-scout-17b-16e-instruct",
+    # model="meta-llama/llama-4-scout-17b-16e-instruct",
+    model="llama-3.3-70b-versatile",
     temperature=0,
     api_key=settings.GROQ_API_KEY,
 )
