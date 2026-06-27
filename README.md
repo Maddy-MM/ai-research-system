@@ -96,7 +96,7 @@ The system uses **LangChain agents** backed by Groq-hosted LLMs to reason over r
 
 - Username: `admin`
 
-- Password: `admin123`
+- Password: `secret`
 
   
 
