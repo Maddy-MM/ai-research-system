@@ -2,7 +2,7 @@
 
 A **multi-agent AI research pipeline** built on LangGraph: a planner breaks a topic into sub-questions, tool-using researcher agents investigate them in parallel via an MCP tool server, a writer drafts the report, a critic iteratively checks it for quality, and a tool-using verifier agent independently fact-checks it against fresh sources — all in a single pipeline run.
 
-Two stages are genuinely agentic — the LLM decides which tools to call, not the code: the **researcher** (one instance per sub-question, running in parallel) and the **verifier** (independently re-checking the report's claims rather than just re-reading the original research). The planner, writer, and critic are single-shot structured-output calls, not autonomous agents.
+The pipeline combines structured LLM steps with autonomous tool-using agents, giving each stage a distinct role in producing the final report. Researchers independently investigate their assigned sub-questions and decide which tools and sources to use, while the verifier performs a separate pass over the finished report to validate its claims against fresh evidence. LangGraph coordinates these stages into a single workflow, allowing research, writing, critique, and verification to work together without relying on a fixed sequence of tool calls.
 
 ---
 
