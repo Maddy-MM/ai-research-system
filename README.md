@@ -136,7 +136,7 @@ ResearchMind uses **JWT-based authentication**. A login is required before acces
 
 - Passwords are verified against a hardcoded admin user configured via environment variables
 - On login, the backend issues a signed JWT token
-- All protected endpoints verify the token via a FastAPI `HTTPBearer` dependency
+- All protected endpoints verify the bearer token via a FastAPI OAuth2PasswordBearer dependency
 
 **Public endpoints:** `/health`, `/auth/token`
 **Protected endpoints:** `/research/run`
