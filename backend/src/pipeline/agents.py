@@ -9,11 +9,7 @@ from src.config import get_settings
 
 settings = get_settings()
 
-# Check if model is a reasoning-capable model (e.g. gpt-5.6-luna, gpt-5, o1, o3)
-is_reasoning_model = any(
-    keyword in settings.OPENAI_MODEL.lower()
-    for keyword in ["gpt-5", "o1", "o3", "luna"]
-)
+model_name = settings.OPENAI_MODEL.lower()
 
 # Standard LLM for structured output & synthesis (Planner, Writer, Critic)
 llm_kwargs = {
@@ -23,23 +19,28 @@ llm_kwargs = {
     "max_retries": 5,
 }
 if settings.OPENAI_REASONING_EFFORT:
-    llm_kwargs["reasoning_effort"] = settings.OPENAI_REASONING_EFFORT
+    if settings.OPENAI_REASONING_EFFORT == "none" and "nano" in model_name:
+        pass
+    else:
+        llm_kwargs["reasoning_effort"] = settings.OPENAI_REASONING_EFFORT
 
 llm = ChatOpenAI(**llm_kwargs)
 
 # Dedicated LLM for tool-calling agents (Researcher, Verifier).
-# OpenAI /v1/chat/completions strictly requires reasoning_effort="none" when function tools
-# are attached to reasoning models (e.g. gpt-5.6-luna).
+# - Models like gpt-5.6-luna strictly require reasoning_effort="none" when function tools are attached.
+# - Models like gpt-5-nano reject reasoning_effort="none" (only supporting minimal/low/medium/high, or omitted).
 tool_llm_kwargs = {
     "model": settings.OPENAI_MODEL,
     "temperature": 0,
     "api_key": settings.OPENAI_API_KEY,
     "max_retries": 5,
 }
-if is_reasoning_model or settings.OPENAI_REASONING_EFFORT == "none":
+if "luna" in model_name:
     tool_llm_kwargs["reasoning_effort"] = "none"
-elif settings.OPENAI_REASONING_EFFORT:
+elif settings.OPENAI_REASONING_EFFORT and settings.OPENAI_REASONING_EFFORT != "none":
     tool_llm_kwargs["reasoning_effort"] = settings.OPENAI_REASONING_EFFORT
+elif settings.OPENAI_REASONING_EFFORT == "none" and "nano" not in model_name:
+    tool_llm_kwargs["reasoning_effort"] = "none"
 
 tool_llm = ChatOpenAI(**tool_llm_kwargs)
 
