@@ -23,8 +23,14 @@ class ResearchRequest(BaseModel):
 class ResearchResponse(BaseModel):
     request_id: str
     topic: str
-    report: str
-    feedback: str
+    report: str | None = None
+    feedback: str | None = None
+    verification: str | None = None
+    clarifying_question: str | None = None
+    critic_score: float | None = None
+    iteration_count: int | None = None
+    tokens_used: int | None = None
+    sub_questions: list[str] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -36,7 +42,6 @@ async def run_research(
     request: ResearchRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
-
     # A unique ID per request — lets you grep logs for a full trace
     request_id = str(uuid.uuid4())
 
@@ -46,9 +51,7 @@ async def run_research(
     )
 
     try:
-        # sync call inside an async route — fine for a pipeline this heavy
-        # since LLM calls dominate the time, not the event loop
-        state = run_research_pipeline(
+        state = await run_research_pipeline(
             topic=request.topic,
             request_id=request_id,
         )
@@ -66,6 +69,12 @@ async def run_research(
     return ResearchResponse(
         request_id=request_id,
         topic=request.topic,
-        report=state["report"],
-        feedback=state["feedback"],
+        report=state.get("report"),
+        feedback=state.get("feedback"),
+        verification=state.get("verification_summary"),
+        clarifying_question=state.get("clarifying_question") or None,
+        critic_score=state.get("critic_score"),
+        iteration_count=state.get("iteration_count"),
+        tokens_used=state.get("tokens_used"),
+        sub_questions=state.get("sub_questions"),
     )

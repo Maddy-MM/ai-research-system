@@ -9,10 +9,6 @@ from src.config import get_settings
 
 settings = get_settings()
 
-# ---------------------------------------------------------------------------
-# Schemas
-# ---------------------------------------------------------------------------
-
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -22,19 +18,7 @@ class TokenData(BaseModel):
     username: str
 
 
-# ---------------------------------------------------------------------------
-# JWT helpers
-# ---------------------------------------------------------------------------
-
 def create_access_token(username: str) -> str:
-    """
-    Creates a signed JWT token.
-
-    Payload fields:
-      sub  — "subject", standard JWT claim, holds the username
-      exp  — expiry timestamp, jose validates this automatically on decode
-      iat  — issued-at timestamp, useful for auditing
-    """
     now = datetime.now(timezone.utc)
     payload = {
         "sub": username,
@@ -60,12 +44,6 @@ def verify_token(token: str) -> TokenData:
         raise credentials_exception
 
 
-# ---------------------------------------------------------------------------
-# FastAPI dependency
-# ---------------------------------------------------------------------------
-
-# OAuth2PasswordBearer extracts the Bearer token from the Authorization header
-# and points Swagger docs to the login endpoint
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 

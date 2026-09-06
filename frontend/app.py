@@ -3,8 +3,12 @@ import requests
 import threading
 import time
 
-API_URL = "https://ai-research-system-x046.onrender.com"  
-# API_URL = "http://127.0.0.1:8000"             
+import os
+
+try:
+    API_URL = st.secrets.get("API_URL", os.environ.get("API_URL", "http://127.0.0.1:8000"))
+except Exception:
+    API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(
     page_title="ResearchMind",
@@ -18,6 +22,15 @@ st.set_page_config(
 st.markdown("""
 <style>
 h1 a, h2 a, h3 a { display: none !important; }
+@media print {
+    header, [data-testid="stSidebar"], div[data-testid="stButton"], .stDownloadButton, [data-testid="stExpander"] {
+        display: none !important;
+    }
+    .main .block-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -29,6 +42,9 @@ for key, val in {
     "token": None,
     "results": None,
     "running": False,
+    "topic": "",
+    "topic_input": "",
+    "history": [],
 }.items():
     if key not in st.session_state:
         st.session_state[key] = val
@@ -104,19 +120,23 @@ with st.sidebar:
         ">
             <div style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06);">
                 <span style="color:rgba(255,140,50,0.8); font-size:0.7rem; font-weight:700;">01</span>
-                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Search Agent finds sources</span>
+                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Planner creates sub-questions</span>
             </div>
             <div style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06);">
                 <span style="color:rgba(255,140,50,0.8); font-size:0.7rem; font-weight:700;">02</span>
-                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Reader Agent scrapes pages</span>
+                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Researchers investigate in parallel</span>
             </div>
             <div style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06);">
                 <span style="color:rgba(255,140,50,0.8); font-size:0.7rem; font-weight:700;">03</span>
-                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Writer Chain drafts report</span>
+                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Writer drafts the report</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                <span style="color:rgba(255,140,50,0.8); font-size:0.7rem; font-weight:700;">04</span>
+                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Critic loops for quality</span>
             </div>
             <div style="display:flex; align-items:center; gap:0.8rem; padding:0.75rem 1rem;">
-                <span style="color:rgba(255,140,50,0.8); font-size:0.7rem; font-weight:700;">04</span>
-                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Critic Chain scores &amp; reviews</span>
+                <span style="color:rgba(255,140,50,0.8); font-size:0.7rem; font-weight:700;">05</span>
+                <span style="color:#ffffff; font-size:0.85rem; font-weight:500;">Verifier checks key claims</span>
             </div>
         </div>
 
@@ -133,7 +153,8 @@ with st.sidebar:
             <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">FastAPI</span>
             <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">LangChain</span>
             <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">LangGraph</span>
-            <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">Groq</span>
+            <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">OpenAI</span>
+            <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">MCP</span>
             <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">Tavily</span>
             <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">JWT</span>
             <span style="background:rgba(255,140,50,0.1); border:1px solid rgba(255,140,50,0.25); border-radius:6px; padding:0.3rem 0.7rem; color:#ffffff; font-size:0.75rem; font-weight:500; letter-spacing:0.03em;">Prometheus</span>
@@ -151,10 +172,36 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
+    if st.session_state.token and st.session_state.get("history"):
+        st.markdown("""
+            <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 1.2rem 0 0.8rem 0;"></div>
+            <p style="
+                color: rgba(255,255,255,0.5);
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin: 0 0 0.6rem 0;
+            ">Recent Reports</p>
+        """, unsafe_allow_html=True)
+
+        for idx, item in enumerate(reversed(st.session_state.history[-5:])):
+            t_title = item.get("topic", "Untitled")
+            disp = (t_title[:24] + "...") if len(t_title) > 24 else t_title
+            if st.button(f"📑 {disp}", key=f"hist_{idx}_{item.get('request_id', idx)}", use_container_width=True):
+                st.session_state.results = item["results"]
+                st.session_state.topic = item["topic"]
+                st.session_state.running = False
+                st.rerun()
+
+        if st.button("🗑️  Clear History", key="clear_hist_btn", use_container_width=True):
+            st.session_state.history = []
+            st.rerun()
+
     if st.session_state.token:
         st.markdown("<div style='margin-top: 1rem;'>", unsafe_allow_html=True)
         if st.button("⎋  Sign Out", use_container_width=True):
-            for key in ("token", "results", "running"):
+            for key in ("token", "results", "running", "topic", "topic_input"):
                 st.session_state[key] = None if key != "running" else False
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
@@ -280,7 +327,7 @@ if not st.session_state.token:
                     <path d="M17 6l2 2"/>
                     <path d="M14 9l2 2"/>
                 </svg>
-                Try it instantly — user: <span style="color:#ff8c32; font-weight:600; font-family: monospace;">admin</span> · pass: <span style="color:#ff8c32; font-weight:600; font-family: monospace;">secret</span>
+                Authorized access only — contact administrator for credentials
             </span>
         </div>
     """, unsafe_allow_html=True)
@@ -326,20 +373,22 @@ if not st.session_state.token:
 # Shared data — defined outside both screens so both can access
 # ---------------------------------------------------------------------------
 steps = [
-    ("Search Agent", "Gathers recent web information"),
-    ("Reader Agent", "Scrapes and extracts content"),
-    ("Writer Chain", "Drafts the research report"),
-    ("Critic Chain", "Reviews and scores the report"),
+    ("Planner", "Breaks the topic into focused sub-questions"),
+    ("Parallel Research", "Tool-using agents investigate each question"),
+    ("Writer", "Combines findings into a structured report"),
+    ("Critic Loop", "Scores the draft and routes revisions"),
+    ("Verifier", "Independently checks the key claims"),
 ]
 
 spinner_messages = [
-    "Searching the web for recent sources...",
-    "Scraping and reading top results...",
+    "Planning focused research questions...",
+    "Investigating sub-questions in parallel...",
     "Writing the research report...",
-    "Reviewing and scoring the report...",
+    "Reviewing the report and applying revisions...",
+    "Independently verifying key claims...",
 ]
 
-step_nums = ["01", "02", "03", "04"]
+step_nums = ["01", "02", "03", "04", "05"]
 
 r = st.session_state.results
 
@@ -374,6 +423,30 @@ if r:
             }
         </style>
     """, unsafe_allow_html=True)
+
+    # If the planner judged the topic too ambiguous to research, `report`/`feedback` are
+    # None — show the clarifying question instead of rendering broken report/feedback panels
+    if r.get("clarifying_question"):
+        st.markdown(f"""
+            <div style="
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.09);
+                border-top: 3px solid #ff8c32;
+                border-radius: 14px;
+                padding: 1.75rem;
+                margin-bottom: 1.5rem;
+            ">
+                <p style="color: rgba(255,140,50,0.8); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.75rem 0;">Needs Clarification</p>
+                <p style="color: #ffffff; font-size: 1.05rem; margin: 0; line-height: 1.6;">{r["clarifying_question"]}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("← Try Again", use_container_width=True):
+            st.session_state.results = None
+            st.session_state.topic = ""
+            st.rerun()
+
+        st.stop()
 
     # Top bar
     st.markdown(f"""
@@ -417,53 +490,148 @@ if r:
         </div>
     """, unsafe_allow_html=True)
 
-    # Report panel
+    # Executive Metrics Bar
+    topic_text = r.get("topic") or st.session_state.get("topic", "")
+    score_val = r.get("critic_score")
+    if score_val is not None:
+        score_display = f"{score_val * 10:.1f} / 10" if score_val <= 1.0 else f"{score_val:.1f} / 10"
+    else:
+        import re
+        match_s = re.search(r"Score:\s*(\d+(?:\.\d+)?)/10", r.get("feedback", "") or "")
+        score_display = f"{match_s.group(1)} / 10" if match_s else "Passed"
+
+    verif_text = r.get("verification") or "Verification was not returned by the backend."
+    import re
+    match_v = re.search(r"(\d+/\d+)\s+claims\s+fully\s+supported", verif_text, re.IGNORECASE)
+    verif_stat = f"{match_v.group(1)} Verified" if match_v else ("Fact-Checked" if "supported" in verif_text.lower() else "Verified")
+
+    iteration_val = r.get("iteration_count", 1)
+    tokens_val = r.get("tokens_used")
+    tokens_display = f"{tokens_val:,}" if tokens_val else "Standard"
+
+    sub_questions = r.get("sub_questions") or []
+    depth_display = f"{len(sub_questions)} Tracks" if sub_questions else "Deep Search"
+
+    mcol1, mcol2, mcol3, mcol4 = st.columns(4)
+    with mcol1:
+        st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 0.85rem 0.9rem; text-align: center;">
+                <p style="color: rgba(255,140,50,0.9); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.25rem 0;">Quality Score</p>
+                <p style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.15rem 0; line-height: 1.1;">{score_display}</p>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; margin: 0;">Critic Approved</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with mcol2:
+        st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 0.85rem 0.9rem; text-align: center;">
+                <p style="color: #60be96; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.25rem 0;">Fact-Check</p>
+                <p style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.15rem 0; line-height: 1.1;">{verif_stat}</p>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; margin: 0;">Independent Verifier</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with mcol3:
+        st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 0.85rem 0.9rem; text-align: center;">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.25rem 0;">Research Depth</p>
+                <p style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.15rem 0; line-height: 1.1;">{depth_display}</p>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; margin: 0;">Parallel MCP Agents</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with mcol4:
+        st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 0.85rem 0.9rem; text-align: center;">
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.25rem 0;">Compute</p>
+                <p style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.15rem 0; line-height: 1.1;">{tokens_display}</p>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; margin: 0;">{iteration_val} Iteration{'s' if iteration_val != 1 else ''}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    if sub_questions:
+        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+        with st.expander(f"🔍 Explored Sub-Questions ({len(sub_questions)} Parallel Tracks)", expanded=False):
+            for idx_q, sq in enumerate(sub_questions, start=1):
+                st.markdown(f"**Track {idx_q:02d}:** {sq}")
+
+    # Report header & Native Markdown Container
     st.markdown("""
-        <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.75rem 0;">Research Report</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin: 1.8rem 0 0.8rem 0;">
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">Research Report</p>
+            <span style="color: rgba(255,255,255,0.3); font-size: 0.7rem;">Markdown · Formatted Output</span>
+        </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-        <div style="
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.09);
-            border-top: 3px solid #ff8c32;
-            border-radius: 14px;
-            padding: 1.75rem;
-            margin-bottom: 1.5rem;
-            color: rgba(255,255,255,0.85);
-            font-size: 0.9rem;
-            line-height: 1.8;
-        ">{r["report"]}</div>
-    """, unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown(r["report"])
 
-    st.download_button(
-        label="Download Report",
-        data=r["report"],
-        file_name=f"research_report_{int(time.time())}.md",
-        mime="text/markdown",
-        use_container_width=True,
-    )
+    st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
+
+    act_col1, act_col2 = st.columns([1, 1])
+    with act_col1:
+        report_download = f"""---
+title: "{topic_text}"
+request_id: "{r.get('request_id', '')}"
+critic_score: "{score_display}"
+date: "{time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}"
+pipeline: "ResearchMind Multi-Agent LangGraph"
+---
+
+{r["report"]}
+"""
+        st.download_button(
+            label="📥  Download Report (.md)",
+            data=report_download,
+            file_name=f"research_report_{int(time.time())}.md",
+            mime="text/markdown",
+            use_container_width=True,
+        )
+
+    with act_col2:
+        with st.expander("📋 View Raw / Copy"):
+            st.code(r["report"], language="markdown")
 
     st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 
-    # Critic panel
+    # Independent citation verification panel
     st.markdown("""
-        <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.75rem 0;">Critic Feedback</p>
-    """, unsafe_allow_html=True)
-
-    st.markdown(f"""
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+            <p style="color: #60be96; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">🛡️ Citation Verification</p>
+            <span style="background: rgba(96,190,150,0.1); border: 1px solid rgba(96,190,150,0.3); border-radius: 12px; padding: 0.2rem 0.65rem; color: #60be96; font-size: 0.68rem; font-weight: 700;">Independent Tool Fact-Check</span>
+        </div>
         <div style="
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-top: 3px solid rgba(255,140,50,0.4);
-            border-radius: 14px;
-            padding: 1.75rem;
+            background: rgba(96,190,150,0.03);
+            border: 1px solid rgba(96,190,150,0.2);
+            border-left: 4px solid #60be96;
+            border-radius: 12px;
+            padding: 1.4rem 1.6rem;
             margin-bottom: 1.5rem;
-            color: rgba(255,255,255,0.75);
+            color: rgba(255,255,255,0.85);
             font-size: 0.88rem;
             line-height: 1.8;
-        ">{r["feedback"]}</div>
+        ">
     """, unsafe_allow_html=True)
+    st.markdown(verif_text)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Critic panel
+    st.markdown("""
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+            <p style="color: #ff8c32; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0;">🔍 Critic Review & Feedback</p>
+            <span style="background: rgba(255,140,50,0.1); border: 1px solid rgba(255,140,50,0.3); border-radius: 12px; padding: 0.2rem 0.65rem; color: #ff8c32; font-size: 0.68rem; font-weight: 700;">Iterative Loop</span>
+        </div>
+        <div style="
+            background: rgba(255,140,50,0.02);
+            border: 1px solid rgba(255,140,50,0.18);
+            border-left: 4px solid #ff8c32;
+            border-radius: 12px;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 1.5rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.88rem;
+            line-height: 1.8;
+        ">
+    """, unsafe_allow_html=True)
+    st.markdown(r.get("feedback") or "No feedback recorded.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Footer
     st.markdown(f"""
@@ -610,11 +778,39 @@ else:
                     line-height: 1.7;
                     border-left: 2px solid rgba(255,140,50,0.3);
                     padding-left: 0.75rem;
-                ">Four specialized AI agents collaborate to deliver a polished research report on any topic.</p>
+                ">A planner, parallel researchers, writer, critic, and verifier collaborate to deliver a polished research report.</p>
             </div>
         """, unsafe_allow_html=True)
 
-        topic = st.text_input("Research Topic", placeholder="e.g. Breakthroughs in quantum computing 2025")
+        starter_prompts = [
+            "Breakthroughs in Quantum Computing 2025",
+            "State of Open-Source Reasoning LLMs",
+            "Room-Temperature Superconductor Claims",
+            "Solid-State Battery Commercialization",
+        ]
+
+        st.markdown("""
+            <p style="color: rgba(255,255,255,0.4); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.5rem 0;">Sample Topics</p>
+        """, unsafe_allow_html=True)
+
+        chip_col1, chip_col2 = st.columns(2)
+        for i, prompt in enumerate(starter_prompts):
+            target_col = chip_col1 if i % 2 == 0 else chip_col2
+            with target_col:
+                if st.button(f"💡 {prompt}", key=f"chip_starter_{i}", use_container_width=True):
+                    st.session_state.topic_input = prompt
+                    st.session_state.topic = prompt
+                    st.rerun()
+
+        st.markdown("<div style='height: 0.4rem;'></div>", unsafe_allow_html=True)
+
+        input_val = st.session_state.get("topic_input", "")
+        topic = st.text_input(
+            "Research Topic",
+            value=input_val,
+            placeholder="e.g. Breakthroughs in quantum computing 2025",
+            key="research_topic_input_box"
+        )
         run_btn = st.button("Run Research Pipeline", use_container_width=True)
 
         st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
@@ -628,10 +824,10 @@ else:
                 letter-spacing: 0.1em;
                 text-transform: uppercase;
                 margin: 0 0 0.75rem 0;
-            ">Pipeline</p>
+            ">Pipeline Architecture</p>
         """, unsafe_allow_html=True)
 
-        step_cols = st.columns(4)
+        step_cols = st.columns(5)
         for i, (name, desc) in enumerate(steps):
             with step_cols[i]:
                 st.markdown(f"""
@@ -653,11 +849,13 @@ else:
 
         # Run pipeline
         if run_btn:
-            if not topic.strip():
+            chosen = topic.strip()
+            if not chosen:
                 st.warning("Please enter a research topic first.")
             else:
                 st.session_state.results = None
-                st.session_state.topic = topic
+                st.session_state.topic = chosen
+                st.session_state.topic_input = chosen
                 st.session_state.running = True
                 st.rerun()
 
@@ -673,7 +871,7 @@ else:
                     f"{API_URL}/research/run",
                     json={"topic": topic_to_run},
                     headers={"Authorization": f"Bearer {token}"},
-                    timeout=180,
+                    timeout=600,
                 )
                 result_container["data"] = res.json()
             except Exception as e:
@@ -706,28 +904,45 @@ else:
                         <path d="M11 2a9 9 0 1 0 9 9A9 9 0 0 0 11 2zm0 16a7 7 0 1 1 7-7 7 7 0 0 1-7 7zm1-11h-2v5l4.25 2.52.75-1.23-3-1.79z"/>
                     </svg>
                 </div>
-                <p style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 0.3rem 0;">Pipeline Running</p>
+                <p style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 0.3rem 0;">Multi-Agent Pipeline Active</p>
                 <p style="color: rgba(255,255,255,0.4); font-size: 0.82rem; margin: 0 0 1.5rem 0;">
-                    Researching <span style="color: #ff8c32; font-weight: 600;">{topic_to_run}</span>
+                    Investigating <span style="color: #ff8c32; font-weight: 600;">{topic_to_run}</span>
                 </p>
         """, unsafe_allow_html=True)
 
-        st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
         status_ph = st.empty()
         step_idx = 0
         elapsed = 0
         step_duration = 15
+        start_time = time.time()
 
         while thread.is_alive():
+            elapsed_total = int(time.time() - start_time)
+            mins, secs = divmod(elapsed_total, 60)
             current = min(step_idx, len(spinner_messages) - 1)
             status_ph.markdown(f"""
-                <p style="
-                    color: rgba(255,255,255,0.55);
-                    font-size: 0.82rem;
-                    text-align: center;
-                    margin: 0;
-                    letter-spacing: 0.02em;
-                ">⏳ {spinner_messages[current]}</p>
+                <div style="text-align: center;">
+                    <p style="
+                        color: #ff8c32;
+                        font-size: 1.15rem;
+                        font-weight: 800;
+                        letter-spacing: 0.04em;
+                        margin: 0 0 0.4rem 0;
+                    ">⏱ {mins:02d}:{secs:02d}</p>
+                    <p style="
+                        color: rgba(255,255,255,0.75);
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        margin: 0 0 0.3rem 0;
+                    ">⏳ {spinner_messages[current]}</p>
+                    <p style="
+                        color: rgba(255,255,255,0.35);
+                        font-size: 0.72rem;
+                        margin: 0;
+                        letter-spacing: 0.02em;
+                    ">Parallel agents are searching Tavily, scraping content, and querying arXiv via MCP...</p>
+                </div>
             """, unsafe_allow_html=True)
             time.sleep(1)
             elapsed += 1
@@ -747,6 +962,18 @@ else:
             st.error(f"Pipeline failed: {result_container['data']['detail']}")
             st.session_state.running = False
         else:
-            st.session_state.results = result_container["data"]
+            payload = result_container["data"]
+            st.session_state.results = payload
             st.session_state.running = False
+
+            if "history" not in st.session_state or not isinstance(st.session_state.history, list):
+                st.session_state.history = []
+
+            # Prepend or append to recent history
+            st.session_state.history.append({
+                "topic": topic_to_run,
+                "timestamp": time.strftime("%H:%M"),
+                "results": payload,
+                "request_id": payload.get("request_id", ""),
+            })
             st.rerun()

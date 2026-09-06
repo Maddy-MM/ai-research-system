@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ResearchMind — Multi-Agent Research Pipeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23FF7E29'/%3E%3Cpath d='M16 5.5L28 11.5L16 17.5L4 11.5Z' fill='%23FFFFFF'/%3E%3Cpath d='M7.5 14v4.5C7.5 21.8 11.2 24.5 16 24.5s8.5-2.7 8.5-6V14' fill='none' stroke='%23FFFFFF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M28 11.5v6.5' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='28' cy='19.5' r='1.4' fill='%23FFFFFF'/%3E%3Cpolygon points='16,8.8 18.2,11.5 16,14.2 13.8,11.5' fill='%23FF7E29'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260906_45">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-dark text-light">
+    <!-- App Container -->
+    <div id="app-root" class="app-layout">
+        <!-- SCREEN 0: LOGIN VIEW (PRODUCTION-GRADE) -->
+        <section id="view-login" class="screen-view login-screen-layout">
+            <!-- Animated particle canvas & ambient lighting (Clipped to prevent phantom scroll) -->
+            <div class="login-background-canvas">
+                <canvas id="particle-canvas" style="position:absolute;inset:0;z-index:0;pointer-events:none;"></canvas>
+                <div class="login-mesh-grid"></div>
+                <div class="login-ambient-orb login-ambient-orb-primary"></div>
+                <div class="login-ambient-orb login-ambient-orb-secondary"></div>
+                <div class="login-horizon-beam"></div>
+            </div>
+
+            <!-- Top Header Bar -->
+            <header class="login-top-bar">
+                <div class="brand-signature">
+                    <div class="brand-glyph glow-orange">
+                        <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Bold Graduation Mortarboard Diamond Cap -->
+                            <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
+                            <!-- Bold Skullcap Arch Below -->
+                            <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <!-- Academic Tassel Ribbon & Bob -->
+                            <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                            <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
+                            <!-- Central AI Spark/Diamond Cutout Core -->
+                            <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
+                        </svg>
+                    </div>
+                    <span class="brand-title">Research<span class="text-orange">Mind</span></span>
+                    <span class="version-tag">2.0</span>
+                </div>
+
+                <div class="telemetry-capsule-pill" title="Live System Telemetry: All Pipeline Nodes Operational">
+                    <span class="telemetry-label">SYSTEMS</span>
+                    <span class="telemetry-divider"></span>
+                    <div class="telemetry-status">
+                        <span class="status-pulse-dot"></span>
+                        <span class="status-text">Operational</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main 2-Column Layout -->
+            <main class="login-main-stage">
+                <div class="login-stage-inner">
+                    
+                    <!-- Left Hero Pane -->
+                    <div class="login-hero-pane">
+                        <div class="eyebrow-pill">
+                            <span class="eyebrow-pulse-dot"></span>
+                            <span>Autonomous Research System</span>
+                        </div>
+
+                        <h1 class="hero-headline">
+                            Multi-Agent Intelligence for <span class="text-gradient">Deep Investigation</span>
+                        </h1>
+                        <p class="hero-description">
+                            Five specialized AI agents — planner, researchers, writer, critic, and verifier — collaborate autonomously to deliver verified research reports.
+                        </p>
+
+                        <!-- Lightweight feature list (no boxes) -->
+                        <div class="hero-features-list">
+                            <div class="feature-line">
+                                <div class="feature-bullet"></div>
+                                <div class="feature-text">
+                                    <span class="feature-title">LangGraph Orchestration</span>
+                                    <span class="feature-desc">Adaptive multi-agent loops with quality evaluation</span>
+                                </div>
+                            </div>
+                            <div class="feature-line">
+                                <div class="feature-bullet"></div>
+                                <div class="feature-text">
+                                    <span class="feature-title">MCP Web Extraction</span>
+                                    <span class="feature-desc">Parallel intelligence gathering with live citations</span>
+                                </div>
+                            </div>
+                            <div class="feature-line">
+                                <div class="feature-bullet"></div>
+                                <div class="feature-text">
+                                    <span class="feature-title">Fact-Check Verifier</span>
+                                    <span class="feature-desc">Independent claim validation before delivery</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tech stack strip -->
+                        <div class="hero-tech-strip">
+                            <span class="tech-chip">FastAPI</span>
+                            <span class="tech-chip">LangGraph</span>
+                            <span class="tech-chip">OpenAI</span>
+                            <span class="tech-chip">MCP</span>
+                            <span class="tech-chip">Tavily</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Premium Glass Auth Panel -->
+                    <div class="login-form-pane">
+                        <div class="auth-console-box">
+                            <div class="auth-box-header">
+                                <h2 class="auth-title">Welcome back</h2>
+                                <p class="auth-subtitle">Sign in to your research workspace</p>
+                            </div>
+
+                            <div id="login-error" class="alert alert-danger hidden"></div>
+
+                            <form id="login-form" class="form-group">
+                                <div class="input-field-group">
+                                    <label for="username">Username</label>
+                                    <div class="input-with-icon">
+                                        <input type="text" id="username" class="text-input input-padded" placeholder="Enter username" required autocomplete="username">
+                                        <svg class="field-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div class="input-field-group">
+                                    <label for="password">Password</label>
+                                    <div class="input-with-icon">
+                                        <input type="password" id="password" class="text-input input-padded" placeholder="Enter password" required autocomplete="current-password">
+                                        <svg class="field-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        </svg>
+                                        <button type="button" id="btn-toggle-password" class="btn-input-action" title="Toggle password visibility" aria-label="Toggle password visibility">
+                                            <svg id="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block btn-lg">
+                                    <span class="btn-label">Sign in</span>
+                                    <div class="spinner hidden" id="login-spinner"></div>
+                                </button>
+                            </form>
+
+                            <div class="login-hint">
+                                <div class="login-hint-badge">
+                                    <svg class="hint-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    <span class="hint-text">Initial sign-in may take <strong class="hint-time">30–60s</strong> on backend wake</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <!-- Bottom Dock -->
+            <footer class="login-bottom-dock">
+                <span class="dock-item">FastAPI Core</span>
+                <span class="dock-sep">·</span>
+                <span class="dock-item">LangGraph Multi-Agent</span>
+                <span class="dock-sep">·</span>
+                <span class="dock-item">MCP Protocol</span>
+                <span class="dock-sep">·</span>
+                <span class="dock-item">JWT Bearer Protected</span>
+            </footer>
+        </section>
+
+        <!-- MAIN SHELL (Sidebar + Main Stage) -->
+        <div id="view-authenticated" class="screen-view app-shell hidden">
+            
+            <!-- Sleek Floating Obsidian Dock Toggle (Open Sidebar) -->
+            <button type="button" id="btn-prominent-open-sidebar" class="sidebar-floating-toggle sidebar-boundary-tab hidden" title="Expand Workspace (Ctrl+\)" aria-label="Expand Workspace">
+                <div class="floating-toggle-icon">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                        <polyline points="14 9 17 12 14 15"></polyline>
+                    </svg>
+                </div>
+                <span class="floating-toggle-label">Workspace</span>
+                <span class="floating-toggle-pip"></span>
+            </button>
+
+            <!-- SIDEBAR (Collapsible Workspace Panel: 290px expanded, 0px collapsed) -->
+            <aside id="app-sidebar" class="app-sidebar collapsed">
+                <!-- Edge rail collapse tab kept in DOM for JS compatibility -->
+                <button type="button" id="btn-collapse-sidebar-rail" class="sidebar-collapse-rail-tab" title="Collapse Sidebar (Ctrl+\)" aria-label="Collapse Sidebar" style="display:none;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+
+                <!-- Sidebar Brand Header -->
+                <div class="sidebar-brand">
+                    <div class="brand-signature">
+                        <div class="brand-glyph glow-orange">
+                            <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
+                                <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                                <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
+                                <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
+                            </svg>
+                        </div>
+                        <div class="brand-text-block">
+                            <div class="brand-name">Research<span class="text-orange">Mind</span></div>
+                            <div class="brand-sub">Multi-Agent Intelligence</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-brand-controls">
+                        <span class="version-tag">2.0</span>
+                        <button type="button" id="btn-collapse-sidebar" class="btn-sidebar-toggle" title="Collapse Sidebar (Ctrl+\)" aria-label="Collapse Sidebar">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Self-contained Scrollable Sidebar Content -->
+                <div class="sidebar-scroll-content">
+                    <!-- Primary Action: New Research Inquiry Button -->
+                    <button type="button" id="btn-sidebar-new-search" class="sidebar-new-inquiry-btn" title="Start a New Research Inquiry (Ctrl+K)">
+                        <div class="inquiry-btn-inner">
+                            <div class="inquiry-plus-badge">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </div>
+                            <span class="inquiry-btn-text">New Research</span>
+                        </div>
+                        <kbd class="inquiry-btn-kbd">Ctrl+K</kbd>
+                    </button>
+
+                    <!-- SECTION 1: Recent Enquiries Dossier Deck (Spacious, High-Utility Hero Box) -->
+                    <div id="sidebar-history-container" class="sidebar-card history-card">
+                        <div class="sidebar-card-header">
+                            <div class="card-header-title-group">
+                                <div class="card-header-icon violet">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </div>
+                                <span class="card-header-title">Recent Enquiries</span>
+                                <span id="history-count-badge" class="card-counter-pill">0</span>
+                            </div>
+                            <button type="button" id="btn-clear-history" class="btn-card-action btn-trash-action" title="Clear All Recent Enquiries" aria-label="Clear All Recent Enquiries">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="history-list" class="history-scroll-box"></div>
+                    </div>
+
+                    <!-- SECTION 2: Minimalist Pipeline Engine Status (Non-redundant, clean) -->
+                    <div class="sidebar-status-card">
+                        <div class="status-card-header">
+                            <div class="status-header-title">
+                                <span class="status-live-pip"></span>
+                                <span>Pipeline Engine</span>
+                            </div>
+                            <span class="status-version-badge">DAG v0.2</span>
+                        </div>
+                        <div class="status-chips-row">
+                            <span class="status-chip chip-amber">LangGraph</span>
+                            <span class="status-chip chip-green">5 Agents</span>
+                            <span class="status-chip chip-cyan">MCP Native</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: Official GitHub Repository Button (Direct Utility, Above User Dock) -->
+                    <a href="https://github.com/Maddy-MM/ai-research-system" target="_blank" rel="noopener noreferrer" class="sidebar-github-card" title="View Source Code & Documentation on GitHub">
+                        <div class="github-card-left">
+                            <div class="github-icon-wrap">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="github-card-meta">
+                                <span class="github-card-title">ai-research-system</span>
+                                <span class="github-card-sub">GitHub Repository</span>
+                            </div>
+                        </div>
+                        <div class="github-card-action">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Sleek Centered Sign Out Footer (Finishes off the sidebar cleanly) -->
+                <div class="sidebar-footer">
+                    <button type="button" id="btn-logout" class="sidebar-signout-btn" title="Sign Out of Session" aria-label="Sign Out">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT STAGE -->
+            <main class="app-main-stage">
+                <!-- Ambient Stage Background Lighting & Mesh (Sticky pinned so it stays throughout scrolling) -->
+                <div class="stage-background-canvas">
+                    <div class="stage-ambient-orb stage-orb-1"></div>
+                    <div class="stage-ambient-orb stage-orb-2"></div>
+                    <div class="stage-ambient-orb stage-orb-3"></div>
+                    <div class="stage-mesh-grid"></div>
+                    <canvas id="stage-neural-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+                </div>
+
+                <!-- SCREEN 1: SEARCH / DASHBOARD -->
+                <section id="stage-search" class="stage-view">
+                    <!-- Stage Top Telemetry Bar (Full-Width App Chrome) -->
+                    <header class="stage-top-bar">
+                        <div class="stage-top-bar-inner">
+                            <div class="stage-top-left">
+                                <div class="header-brand-mark" title="ResearchMind Multi-Agent Research System">
+                                    <div class="header-logo-badge">
+                                        <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
+                                            <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                                            <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
+                                            <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
+                                        </svg>
+                                    </div>
+                                    <span class="header-brand-title">Research<span class="brand-accent">Mind</span></span>
+                                </div>
+                                <div class="chrome-sep"></div>
+                                <div class="stage-breadcrumbs">
+                                    <span class="crumb-root">Workspace</span>
+                                    <span class="crumb-sep">/</span>
+                                    <span class="crumb-current">Autonomous Intelligence</span>
+                                </div>
+                            </div>
+                            <div class="stage-telemetry">
+                                <div class="telemetry-pill highlight" title="5 Autonomous AI Agents Operational">
+                                    <span class="status-pulse-dot"></span>
+                                    <span>5 Agents Ready</span>
+                                </div>
+                                <div class="telemetry-pill mcp-telemetry" title="Model Context Protocol: Tavily, arXiv & Content Scraper Active">
+                                    <span class="status-pulse-dot cyan"></span>
+                                    <span>MCP Active</span>
+                                </div>
+                                <div class="telemetry-pill engine-telemetry" title="LangGraph Multi-Agent Architecture v0.2">
+                                    <span class="engine-dot"></span>
+                                    <span>LangGraph v0.2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="stage-container">
+                        <!-- Dual-Zone Command Studio Grid -->
+                        <div class="studio-command-grid">
+
+                            <!-- ZONE 1: Left - The Inquiry Console -->
+                            <div class="studio-inquiry-zone">
+                                <!-- Hero Header -->
+                                <div class="hero-header">
+                                    <h1 class="hero-title">What would you like to <span class="text-orange-gradient">research?</span></h1>
+                                    <p class="hero-desc">Formulate complex inquiries. Autonomous agents collaborate across web & arXiv literature to synthesize evidence and verify claims.</p>
+                                </div>
+
+                                <!-- Central Search Console -->
+                                <div class="search-console-wrapper">
+                                    <form id="research-form" class="search-box-card glass-panel" novalidate>
+                                        <div class="search-input-wrapper">
+                                            <div class="search-icon-box">
+                                                <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <circle cx="11" cy="11" r="8"></circle>
+                                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                                </svg>
+                                            </div>
+                                            <input type="text" id="research-topic" class="search-input" placeholder="Enter research inquiry or hypothesis..." autocomplete="off">
+                                            <button type="button" id="btn-clear-topic" class="btn-clear-input hidden" title="Clear inquiry">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <button type="submit" id="btn-run-pipeline" class="btn btn-primary btn-search" title="Execute Multi-Agent Research Pipeline">
+                                            <span>Run Pipeline</span>
+                                            <svg class="btn-arrow-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Quick Inquiries (Prompt Shelf) -->
+                                <div class="sample-prompt-shelf">
+                                    <div class="prompt-shelf-header">
+                                        <div class="prompt-shelf-title-box">
+                                            <div class="prompt-shelf-eyebrow">
+                                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                                </svg>
+                                                <span>Input Suggestions</span>
+                                            </div>
+                                            <h2 class="prompt-shelf-heading">Suggested Research Inquiries</h2>
+                                            <p class="prompt-shelf-desc">Select any sample prompt below to auto-fill the inquiry console and test multi-agent reasoning.</p>
+                                        </div>
+                                        <div class="prompt-shelf-badge-wrap">
+                                            <span class="prompt-click-hint">
+                                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M15 15l5-5-5-5"/>
+                                                    <path d="M4 20h7a4 4 0 0 0 4-4V5"/>
+                                                </svg>
+                                                Click to auto-fill
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="prompt-cards-grid">
+                                        <button type="button" class="chip-btn prompt-card" data-topic="Breakthroughs in Quantum Computing 2025">
+                                            <div class="prompt-card-meta">
+                                                <div class="prompt-badge-group">
+                                                    <span class="pill-dot quantum"></span>
+                                                    <span class="pill-badge quantum">Quantum</span>
+                                                </div>
+                                                <svg class="prompt-card-arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                                            </div>
+                                            <div class="prompt-card-content">
+                                                <div class="prompt-card-title">Fault-tolerant logical qubits & topological roadmaps</div>
+                                                <div class="prompt-card-query">Breakthroughs in Quantum Computing 2025</div>
+                                            </div>
+                                        </button>
+                                        <button type="button" class="chip-btn prompt-card" data-topic="State of Open-Source Reasoning LLMs">
+                                            <div class="prompt-card-meta">
+                                                <div class="prompt-badge-group">
+                                                    <span class="pill-dot ai"></span>
+                                                    <span class="pill-badge ai">Frontier AI</span>
+                                                </div>
+                                                <svg class="prompt-card-arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                                            </div>
+                                            <div class="prompt-card-content">
+                                                <div class="prompt-card-title">Test-time compute scaling & tree-of-thought RL</div>
+                                                <div class="prompt-card-query">State of Open-Source Reasoning LLMs</div>
+                                            </div>
+                                        </button>
+                                        <button type="button" class="chip-btn prompt-card" data-topic="Room-Temperature Superconductor Claims">
+                                            <div class="prompt-card-meta">
+                                                <div class="prompt-badge-group">
+                                                    <span class="pill-dot physics"></span>
+                                                    <span class="pill-badge physics">Materials</span>
+                                                </div>
+                                                <svg class="prompt-card-arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                                            </div>
+                                            <div class="prompt-card-content">
+                                                <div class="prompt-card-title">Meissner effect evaluations & hydride synthesis</div>
+                                                <div class="prompt-card-query">Room-Temperature Superconductor Claims</div>
+                                            </div>
+                                        </button>
+                                        <button type="button" class="chip-btn prompt-card" data-topic="Solid-State Battery Commercialization">
+                                            <div class="prompt-card-meta">
+                                                <div class="prompt-badge-group">
+                                                    <span class="pill-dot energy"></span>
+                                                    <span class="pill-badge energy">Clean Energy</span>
+                                                </div>
+                                                <svg class="prompt-card-arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                                            </div>
+                                            <div class="prompt-card-content">
+                                                <div class="prompt-card-title">Lithium-metal interfaces & volumetric density</div>
+                                                <div class="prompt-card-query">Solid-State Battery Commercialization</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ZONE 2: Right - The LangGraph Multi-Agent Architecture Topology Panel -->
+                            <div class="studio-engine-zone">
+                                <div class="dag-open-schematic">
+
+                                    <!-- Top Open-Air Floating Eyebrow Badge -->
+                                    <div class="schematic-top-bar">
+                                        <div class="schematic-badge-pill">
+                                            <span class="schematic-live-dot"></span>
+                                            <span class="schematic-badge-title">Autonomous Execution Graph</span>
+                                            <span class="schematic-badge-sep">·</span>
+                                            <span class="schematic-badge-sub">LangGraph StateGraph</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Central Symmetrical Node Pipeline Spine -->
+                                    <div class="schematic-spine">
+
+                                        <!-- Node 01: Planner -->
+                                        <div class="dag-node-pod node-planner">
+                                            <span class="node-pin-socket pin-bottom"></span>
+                                            <div class="dag-pod-icon planner">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                                                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                                                </svg>
+                                            </div>
+                                            <div class="dag-pod-info">
+                                                <div class="dag-pod-header">
+                                                    <span class="dag-pod-title"><span class="pod-step-num num-planner">01</span> Planner</span>
+                                                    <span class="dag-pod-tag tag-planner">Decomposition</span>
+                                                </div>
+                                                <p class="dag-pod-desc">Formulates targeted parallel sub-queries</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Circuit Distribution Bus: Splits Planner -> Web & Scholar -->
+                                        <div class="circuit-bus circuit-fork">
+                                            <div class="bus-stem-center stem-down"></div>
+                                            <div class="bus-crossbar">
+                                                <div class="bus-drop drop-left">
+                                                    <span class="bus-pin"></span>
+                                                </div>
+                                                <div class="bus-drop drop-right">
+                                                    <span class="bus-pin"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Parallel Multi-Agent Row (02A Web & 02B Scholar) -->
+                                        <div class="dag-parallel-row">
+                                            <!-- Pod 02A: Web Agent -->
+                                            <div class="dag-node-pod pod-parallel pod-tavily">
+                                                <span class="node-pin-socket pin-top"></span>
+                                                <span class="node-pin-socket pin-bottom"></span>
+                                                <div class="dag-parallel-top">
+                                                    <div class="dag-pod-icon icon-sm tavily">
+                                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <circle cx="12" cy="12" r="10"></circle>
+                                                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <span class="dag-pod-tag tag-tools">Live Web</span>
+                                                </div>
+                                                <div class="dag-pod-title pod-title-sm"><span class="pod-step-num num-tools">02A</span> Web Agent</div>
+                                                <span class="dag-pod-desc pod-desc-sm">Tavily Search API</span>
+                                            </div>
+
+                                            <!-- Pod 02B: Scholar Agent -->
+                                            <div class="dag-node-pod pod-parallel pod-arxiv">
+                                                <span class="node-pin-socket pin-top"></span>
+                                                <span class="node-pin-socket pin-bottom"></span>
+                                                <div class="dag-parallel-top">
+                                                    <div class="dag-pod-icon icon-sm arxiv">
+                                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <span class="dag-pod-tag tag-scholar">Preprints</span>
+                                                </div>
+                                                <div class="dag-pod-title pod-title-sm"><span class="pod-step-num num-scholar">02B</span> Scholar Agent</div>
+                                                <span class="dag-pod-desc pod-desc-sm">arXiv Literature</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Circuit Collection Bus: Merges Web & Scholar -> Writer -->
+                                        <div class="circuit-bus circuit-merge">
+                                            <div class="bus-crossbar crossbar-merge">
+                                                <div class="bus-rise rise-left">
+                                                    <span class="bus-pin"></span>
+                                                </div>
+                                                <div class="bus-rise rise-right">
+                                                    <span class="bus-pin"></span>
+                                                </div>
+                                            </div>
+                                            <div class="bus-stem-center stem-down"></div>
+                                        </div>
+
+                                        <!-- Node 03: Synthesis Writer -->
+                                        <div class="dag-node-pod node-writer">
+                                            <span class="node-pin-socket pin-top"></span>
+                                            <span class="node-pin-socket pin-bottom"></span>
+                                            <div class="dag-pod-icon writer">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                </svg>
+                                            </div>
+                                            <div class="dag-pod-info">
+                                                <div class="dag-pod-header">
+                                                    <span class="dag-pod-title"><span class="pod-step-num num-writer">03</span> Writer</span>
+                                                    <span class="dag-pod-tag tag-writer">Synthesis</span>
+                                                </div>
+                                                <p class="dag-pod-desc">Evidence synthesis & markdown generation</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Stem 3 -> 4 with Feedback Return Loop -->
+                                        <div class="circuit-stem-block">
+                                            <div class="bus-stem-center stem-down"></div>
+                                            <!-- Dedicated Feedback Loop Arc outside the central spine -->
+                                            <div class="circuit-loop-return" title="Critic Loopback: Routes draft revisions back to Writer if score < 80%">
+                                                <svg class="loop-return-svg" viewBox="0 0 44 88" fill="none">
+                                                    <path d="M 6 78 C 40 78, 40 10, 6 10" stroke="rgba(255, 164, 90, 0.65)" stroke-width="1.6" stroke-dasharray="3.5 3" class="loop-dash-anim"/>
+                                                    <polygon points="12,6 2,10 12,14" fill="#FFA45A" opacity="0.9"/>
+                                                </svg>
+                                                <span class="loop-return-tag">Iterate</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Node 04: Critic Loop -->
+                                        <div class="dag-node-pod node-loop">
+                                            <span class="node-pin-socket pin-top"></span>
+                                            <span class="node-pin-socket pin-bottom"></span>
+                                            <div class="dag-pod-icon loop">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="dag-pod-info">
+                                                <div class="dag-pod-header">
+                                                    <span class="dag-pod-title"><span class="pod-step-num num-loop">04</span> Critic Loop</span>
+                                                    <span class="dag-pod-tag tag-loop">↺ Quality Gate</span>
+                                                </div>
+                                                <p class="dag-pod-desc">Evaluates rigor & routes revisions</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Stem 4 -> 5 (Approval Gate) -->
+                                        <div class="circuit-stem-block gate-block">
+                                            <div class="bus-stem-center stem-approved"></div>
+                                            <span class="gate-tag">Score ≥ 80%</span>
+                                        </div>
+
+                                        <!-- Node 05: Fact Verifier -->
+                                        <div class="dag-node-pod node-verified">
+                                            <span class="node-pin-socket pin-top"></span>
+                                            <div class="dag-pod-icon verified">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                                </svg>
+                                            </div>
+                                            <div class="dag-pod-info">
+                                                <div class="dag-pod-header">
+                                                    <span class="dag-pod-title"><span class="pod-step-num num-verified">05</span> Fact Verifier</span>
+                                                    <span class="dag-pod-tag tag-verified">✓ Fact Checked</span>
+                                                </div>
+                                                <p class="dag-pod-desc">Cross-validates claims against cited sources</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Bottom Open-Air Telemetry Dock -->
+                                    <div class="schematic-bottom-bar">
+                                        <div class="schematic-foot-pill">
+                                            <span class="schematic-foot-dot"></span>
+                                            <span class="schematic-foot-text">Multi-Agent Consensus Enforced</span>
+                                            <span class="schematic-foot-sep">·</span>
+                                            <span class="schematic-foot-tag">100% Autonomous</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- SCREEN 2: RESULTS VIEW -->
+                <section id="stage-results" class="stage-view hidden">
+                    <!-- Results Nav Bar (Full-Width App Chrome) -->
+                    <header class="results-top-bar">
+                        <div class="results-top-bar-inner">
+                            <div class="results-top-left">
+                                <div class="header-brand-mark" id="btn-brand-home" title="Return to ResearchMind Search" style="cursor: pointer;">
+                                    <div class="header-logo-badge">
+                                        <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
+                                            <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                                            <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
+                                            <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
+                                        </svg>
+                                    </div>
+                                    <span class="header-brand-title">Research<span class="brand-accent">Mind</span></span>
+                                </div>
+                                <div class="chrome-sep"></div>
+                                <div class="stage-breadcrumbs">
+                                    <span class="crumb-current">Research Dossier</span>
+                                </div>
+                            </div>
+                            <div class="results-actions">
+                                <div class="telemetry-pill highlight" title="All 5 Agents Completed Synthesis">
+                                    <span class="status-pulse-dot"></span>
+                                    <span>Synthesis Complete</span>
+                                </div>
+                                <div class="telemetry-pill engine-telemetry hide-on-mobile" title="LangGraph Multi-Agent Architecture v0.2">
+                                    <span class="engine-dot"></span>
+                                    <span>LangGraph v0.2</span>
+                                </div>
+                                <button id="btn-print-report" class="btn-chrome-action hide-on-mobile" title="Print or Save as PDF">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                        <rect x="6" y="14" width="12" height="8"></rect>
+                                    </svg>
+                                    <span>Print / PDF</span>
+                                </button>
+                                <button id="btn-back-to-search" class="btn-chrome-action btn-new-search-action" title="Start new research inquiry">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    <span>New Research</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="stage-container results-container">
+                        <!-- Ambiguity / Clarifying Question Banner (Conditional) -->
+                        <div id="clarifying-container" class="clarifying-panel glass-panel hidden">
+                            <div class="panel-tag orange">Topic Ambiguous</div>
+                            <h3 class="clarifying-title">Clarification Required</h3>
+                            <p id="clarifying-question-text" class="clarifying-body"></p>
+                            <button id="btn-clarify-try-again" class="btn btn-primary btn-sm">Try Another Topic</button>
+                        </div>
+
+                        <!-- Main Results Content -->
+                        <div id="report-payload-container">
+                            <!-- Executive Dossier Header Stage Anchor with Cyber Docking Caliper Wings -->
+                            <div class="dossier-header-anchor">
+                                <!-- Primary Cyber Conduit Wing: Left (with Multi-Point Docking Caliper Yoke) -->
+                                <div class="cyber-wing-link wing-primary link-left" aria-hidden="true">
+                                    <div class="wing-beam-rail">
+                                        <div class="wing-beam-core"></div>
+                                        <div class="wing-energy-particle"></div>
+                                        <div class="wing-circuit-ticks"></div>
+                                    </div>
+                                    <!-- High-Tech Docking Caliper Clamp (Brackets Card Vertically) -->
+                                    <div class="docking-caliper-yoke">
+                                        <div class="caliper-prong prong-top">
+                                            <span class="prong-lock-pip"></span>
+                                        </div>
+                                        <div class="caliper-spine">
+                                            <div class="caliper-fiber-trace"></div>
+                                        </div>
+                                        <div class="caliper-manifold-hub">
+                                            <span class="manifold-core-pip"></span>
+                                        </div>
+                                        <div class="caliper-prong prong-bottom">
+                                            <span class="prong-lock-pip"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Topic Title & Executive Dossier Header Card with Glowing Boundary -->
+                                <div class="report-header-block dossier-hero-header">
+                                    <!-- Shining Shimmer Sweep Effect -->
+                                    <div class="header-shimmer-sweep" aria-hidden="true"></div>
+
+                                    <!-- Corner Telemetry Brackets -->
+                                    <div class="corner-bracket top-left" aria-hidden="true"></div>
+                                    <div class="corner-bracket top-right" aria-hidden="true"></div>
+                                    <div class="corner-bracket bottom-left" aria-hidden="true"></div>
+                                    <div class="corner-bracket bottom-right" aria-hidden="true"></div>
+
+                                    <div class="report-eyebrow-bar">
+                                        <div class="dossier-eyebrow-left">
+                                            <div class="dossier-pill">
+                                                <span class="dossier-pulse-dot"></span>
+                                                <span>Autonomous Research Dossier</span>
+                                            </div>
+                                            <span class="dossier-sep">·</span>
+                                            <span class="dossier-meta-item">Multi-Agent Consensus Verified</span>
+                                        </div>
+                                        <button type="button" id="btn-copy-topic" class="btn-copy-topic-pill hide-on-mobile" title="Copy topic headline" aria-label="Copy topic headline">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                            <span class="copy-topic-text">Copy Title</span>
+                                        </button>
+                                    </div>
+                                    <h1 id="results-topic-title" class="report-topic-title"></h1>
+                                    <div class="report-meta-chips-bar">
+                                        <span class="meta-chip chip-langgraph">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                                            <span>LangGraph v0.2</span>
+                                        </span>
+                                        <span class="meta-chip chip-mcp">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+                                            <span>MCP Literature Engine</span>
+                                        </span>
+                                        <span class="meta-chip chip-reading" id="report-reading-time">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                            <span>~1,200 Words · 5 Min Read</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Primary Cyber Conduit Wing: Right (with Multi-Point Docking Caliper Yoke) -->
+                                <div class="cyber-wing-link wing-primary link-right" aria-hidden="true">
+                                    <!-- High-Tech Docking Caliper Clamp (Brackets Card Vertically) -->
+                                    <div class="docking-caliper-yoke">
+                                        <div class="caliper-prong prong-top">
+                                            <span class="prong-lock-pip"></span>
+                                        </div>
+                                        <div class="caliper-spine">
+                                            <div class="caliper-fiber-trace"></div>
+                                        </div>
+                                        <div class="caliper-manifold-hub">
+                                            <span class="manifold-core-pip"></span>
+                                        </div>
+                                        <div class="caliper-prong prong-bottom">
+                                            <span class="prong-lock-pip"></span>
+                                        </div>
+                                    </div>
+                                    <div class="wing-beam-rail">
+                                        <div class="wing-beam-core"></div>
+                                        <div class="wing-energy-particle"></div>
+                                        <div class="wing-circuit-ticks"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Combined Dossier Body Master Deck (Unified Outer Boundary) -->
+                            <div class="dossier-body-deck">
+                                <!-- Sleek Luminous Executive Research Report Launcher Bar -->
+                                <div class="report-launcher-bar" id="report-launcher-bar" role="button" tabindex="0" title="Click to open complete research dossier in full-screen modal">
+                                    <div class="launcher-left-group">
+                                        <div class="doc-badge-icon">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                        </div>
+                                        <h2 class="doc-main-label">Executive Research Synthesis</h2>
+                                    </div>
+                                    <div class="launcher-actions-group">
+                                        <button type="button" id="btn-copy-markdown" class="btn btn-doc-action btn-icon-square hide-on-mobile" title="Copy report markdown to clipboard" aria-label="Copy markdown">
+                                            <svg class="action-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                            </svg>
+                                        </button>
+                                        <button type="button" id="btn-download-markdown" class="btn btn-doc-action btn-icon-square hide-on-mobile" title="Download report file" aria-label="Download report">
+                                            <svg class="action-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="7 10 12 15 17 10"></polyline>
+                                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                            </svg>
+                                        </button>
+                                        <button type="button" id="btn-open-report-modal" class="btn-open-report-modal" title="Open complete research report in full modal">
+                                            <div class="open-btn-inner">
+                                                <span>Read Full Report</span>
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                                </svg>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Executive Mission Metrics HUD (4 Celestial Agent Tiers) -->
+                                <div class="metrics-grid">
+                                    <!-- Metric 01: Quality Score (Cosmic Violet / Solar Amber) -->
+                                    <div class="metric-card metric-score-card">
+                                        <div class="metric-card-aura"></div>
+                                        <div class="metric-top-row">
+                                            <span class="metric-label">Quality Score</span>
+                                            <div class="metric-icon-badge badge-critic">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div id="metric-score" class="metric-val text-amber-val">8.0 / 10</div>
+                                        <div class="metric-sub" id="metric-score-sub">
+                                            <span class="metric-status-dot dot-amber"></span>
+                                            <span>Critic Loop Approved</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Metric 02: Fact-Check Verification (Emerald Mint) -->
+                                    <div class="metric-card metric-verif-card">
+                                        <div class="metric-card-aura"></div>
+                                        <div class="metric-top-row">
+                                            <span class="metric-label">Fact-Check</span>
+                                            <div class="metric-icon-badge badge-verifier">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div id="metric-verification" class="metric-val text-emerald-val">Verified</div>
+                                        <div class="metric-sub">
+                                            <span class="metric-status-dot dot-emerald"></span>
+                                            <span>Independent Verifier</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Metric 03: Research Depth (Cyber Sky Blue) -->
+                                    <div class="metric-card metric-depth-card">
+                                        <div class="metric-card-aura"></div>
+                                        <div class="metric-top-row">
+                                            <span class="metric-label">Research Depth</span>
+                                            <div class="metric-icon-badge badge-researcher">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <circle cx="18" cy="5" r="3"></circle>
+                                                    <circle cx="6" cy="12" r="3"></circle>
+                                                    <circle cx="18" cy="19" r="3"></circle>
+                                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div id="metric-tracks" class="metric-val text-sky-val">Parallel</div>
+                                        <div class="metric-sub">
+                                            <span class="metric-status-dot dot-sky"></span>
+                                            <span>Tavily · arXiv Sub-Agents</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Metric 04: Compute & Cycles (Solar Gold / Violet) -->
+                                    <div class="metric-card metric-compute-card">
+                                        <div class="metric-card-aura"></div>
+                                        <div class="metric-top-row">
+                                            <span class="metric-label">Compute</span>
+                                            <div class="metric-icon-badge badge-compute">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                                    <rect x="9" y="9" width="6" height="6"></rect>
+                                                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                                                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                                                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                                                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                                                    <line x1="20" y1="9" x2="23" y2="9"></line>
+                                                    <line x1="20" y1="14" x2="23" y2="14"></line>
+                                                    <line x1="1" y1="9" x2="4" y2="9"></line>
+                                                    <line x1="1" y1="14" x2="4" y2="14"></line>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div id="metric-tokens" class="metric-val text-violet-val">Standard</div>
+                                        <div id="metric-iterations" class="metric-sub">
+                                            <span class="metric-status-dot dot-violet"></span>
+                                            <span>1 Reflection Iteration</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <!-- Sub-Questions Accordion Panel (Header strictly on top, list strictly below) -->
+                            <div id="subquestions-container" class="subquestions-panel glass-panel hidden">
+                                <div class="subquestions-header" id="subquestions-toggle-btn" role="button" tabindex="0" aria-expanded="false" title="Toggle research inquiries">
+                                    <div class="details-title-box">
+                                        <div class="details-icon-badge">
+                                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        </div>
+                                        <span class="details-heading">Parallel Research Decomposition</span>
+                                        <span class="details-counter-pill"><span id="subquestions-count">0</span> <span>Tracks Explored</span></span>
+                                    </div>
+                                    <div class="details-action-box">
+                                        <div class="details-toggle-circle" aria-hidden="true">
+                                            <svg class="icon-arrow-down" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="subquestions-list" class="subquestions-body"></div>
+                            </div>
+
+                            <!-- Companion Intelligence Grid (Verification + Critic Side-by-Side) -->
+                            <div class="companion-intelligence-grid">
+                                <!-- Fact-Check Verification Panel (Emerald Mint) -->
+                                <div class="verification-card glass-panel">
+                                    <div class="panel-header">
+                                        <div class="panel-title-group">
+                                            <div class="icon-circle green">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                                </svg>
+                                            </div>
+                                            <div class="panel-title-text-group">
+                                                <h3 class="panel-title">Independent Verification</h3>
+                                                <span class="panel-subtitle">Claim-to-Citation Validation</span>
+                                            </div>
+                                        </div>
+                                        <span class="badge-pill green">✓ 100% Fact-Checked</span>
+                                    </div>
+                                    <div id="verification-content" class="panel-body-text"></div>
+                                    <div class="panel-footer-meta">
+                                        <span class="panel-foot-dot green"></span>
+                                        <span>Cross-referenced against arXiv & peer-reviewed sources</span>
+                                    </div>
+                                </div>
+
+                                <!-- Critic Review Panel (Cosmic Violet / Solar Amber) -->
+                                <div class="critic-card glass-panel">
+                                    <div class="panel-header">
+                                        <div class="panel-title-group">
+                                            <div class="icon-circle orange">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="panel-title-text-group">
+                                                <h3 class="panel-title">Critic Review & Quality Loop</h3>
+                                                <span class="panel-subtitle">Reflection Cycle Evaluation</span>
+                                            </div>
+                                        </div>
+                                        <span class="badge-pill orange">↺ Quality Gate Passed</span>
+                                    </div>
+                                    <div id="critic-content" class="panel-body-text"></div>
+                                    <div class="panel-footer-meta">
+                                        <span class="panel-foot-dot orange"></span>
+                                        <span>LangGraph Multi-Agent Reflection Consensus</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer Metadata Dock -->
+                            <footer class="report-footer-meta">
+                                <div class="footer-req-box">
+                                    <span class="req-label">REQUEST ID</span>
+                                    <code id="report-request-id" class="text-code">—</code>
+                                    <button type="button" id="btn-copy-req-id" class="btn-mini-copy" title="Copy Request ID">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="footer-brand-box">
+                                    <span>ResearchMind 2.0</span>
+                                    <span class="foot-sep">·</span>
+                                    <span>LangGraph Multi-Agent Architecture</span>
+                                    <span class="foot-sep">·</span>
+                                    <span>MCP Literature Consensus</span>
+                                </div>
+                            </footer>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- RUNNING MODAL OVERLAY -->
+        <div id="running-modal" class="modal-overlay hidden">
+            <!-- Modal Dedicated Galaxy Starfield Canvas -->
+            <canvas id="modal-neural-canvas" class="modal-canvas"></canvas>
+
+            <!-- Atmospheric Galaxy Nebula Orbs & Cosmic Accents -->
+            <div class="modal-ambient-nebulae">
+                <div class="modal-nebula-orb orb-solar"></div>
+                <div class="modal-nebula-orb orb-violet"></div>
+                <div class="modal-nebula-orb orb-cyan"></div>
+                <div class="modal-horizon-beam"></div>
+                <div class="modal-mesh-grid"></div>
+            </div>
+
+            <div class="modal-card glass-panel">
+                <!-- Subtle Solar Accent Top Edge -->
+                <div class="modal-top-accent"></div>
+
+                <!-- Unified Header Bar: Brand + Live Status + Monospace Timer -->
+                <div class="modal-console-header">
+                    <div class="modal-brand-tag">
+                        <div class="modal-brand-icon">
+                            <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
+                                <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                                <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
+                                <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
+                            </svg>
+                        </div>
+                        <span class="modal-brand-title">ResearchMind</span>
+                        <span class="modal-pipe-badge"><span class="pipe-dot"></span> Active Pipeline</span>
+                    </div>
+                    <div class="modal-timer-pill">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--brand-orange)" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 15 15"></polyline>
+                        </svg>
+                        <span class="timer-display" id="live-timer">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Topic & Autonomous Mission Headline -->
+                <div class="modal-hero-section">
+                    <h3 class="modal-title">Investigating Research Topic</h3>
+                    <p class="modal-topic-subtitle">
+                        Deep multi-agent inquiry into <span id="running-topic-display" class="modal-topic-highlight">"demo"</span>
+                    </p>
+                </div>
+
+                <!-- 5-Stage Visual Telemetry Stepper (Clean & Open) -->
+                <div class="modal-pipeline-stepper" id="modal-pipeline-stepper">
+                    <div class="stepper-step active" data-step="0">
+                        <div class="stepper-node"><span class="stepper-num">01</span></div>
+                        <span class="stepper-label">Planner</span>
+                    </div>
+                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                    <div class="stepper-step" data-step="1">
+                        <div class="stepper-node"><span class="stepper-num">02</span></div>
+                        <span class="stepper-label">MCP Tools</span>
+                    </div>
+                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                    <div class="stepper-step" data-step="2">
+                        <div class="stepper-node"><span class="stepper-num">03</span></div>
+                        <span class="stepper-label">Synthesizer</span>
+                    </div>
+                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                    <div class="stepper-step" data-step="3">
+                        <div class="stepper-node"><span class="stepper-num">04</span></div>
+                        <span class="stepper-label">Critic</span>
+                    </div>
+                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                    <div class="stepper-step" data-step="4">
+                        <div class="stepper-node"><span class="stepper-num">05</span></div>
+                        <span class="stepper-label">Verifier</span>
+                    </div>
+                </div>
+
+                <!-- Single Unified Live Telemetry Console -->
+                <div class="modal-telemetry-console">
+                    <div class="telemetry-objective-row">
+                        <span class="objective-lead">Active Phase</span>
+                        <div class="stage-message" id="running-status-message">Planning focused research questions...</div>
+                    </div>
+                    <div class="telemetry-sub-row">
+                        <div class="telemetry-indicator-cluster">
+                            <svg class="spin-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--brand-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            <span class="telemetry-stream-text">Parallel MCP sub-agents querying Tavily, arXiv & consensus bus</span>
+                        </div>
+                        <div class="telemetry-live-chip">
+                            <span class="pulse-chip-dot"></span> LIVE BUS
+                        </div>
+                    </div>
+                    <!-- Ambient scanline trace at bottom -->
+                    <div class="telemetry-scan-bar"><div class="telemetry-scan-pulse"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FULL RESEARCH REPORT MODAL OVERLAY -->
+        <div id="modal-report-viewer" class="modal-overlay report-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
+            <!-- Modal Dedicated Ambient Lighting -->
+            <div class="modal-ambient-nebulae">
+                <div class="modal-nebula-orb orb-solar"></div>
+                <div class="modal-nebula-orb orb-violet"></div>
+                <div class="modal-horizon-beam"></div>
+            </div>
+
+            <div class="report-modal-card glass-panel" id="report-modal-card">
+                <!-- Modal Top Solar Accent Edge -->
+                <div class="report-modal-top-accent"></div>
+
+                <!-- Top-Right Dedicated Circular Close Button -->
+                <button type="button" id="btn-close-report-modal" class="btn-modal-close-circle" title="Close report modal (Esc)" aria-label="Close report modal">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <!-- Modal Header Bar -->
+                <header class="report-modal-header">
+                    <div class="report-modal-header-left">
+                        <div class="doc-badge-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="report-modal-title-group">
+                            <div class="report-modal-eyebrow">
+                                <span class="report-modal-status-dot"></span>
+                                <span>Multi-Agent Consensus Synthesis</span>
+                                <span class="modal-sep">·</span>
+                                <span id="modal-report-meta">~1,200 Words · 5 Min Read</span>
+                            </div>
+                            <h2 id="modal-report-title" class="report-modal-title">Executive Research Synthesis</h2>
+                        </div>
+                    </div>
+
+                    <div class="report-modal-header-actions">
+                        <button type="button" id="btn-modal-copy-markdown" class="btn btn-doc-action btn-icon-square" title="Copy report markdown to clipboard" aria-label="Copy Markdown">
+                            <svg class="action-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                        <button type="button" id="btn-modal-download-markdown" class="btn btn-doc-primary btn-icon-square" title="Download report file (.md)" aria-label="Download Report (.md)">
+                            <svg class="action-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Modal Scrollable Markdown Body -->
+                <div class="report-modal-body" id="report-modal-scroll">
+                    <article id="modal-report-rendered-content" class="markdown-body"></article>
+                </div>
+
+                <!-- Modal Footer -->
+                <footer class="report-modal-footer">
+                    <div class="modal-footer-meta">
+                        <span class="modal-foot-dot"></span>
+                        <span>Verified across Tavily web intelligence & arXiv academic repository</span>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- FLOATING TOAST -->
+        <div id="toast-notification" class="toast hidden"></div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js?v=20260906_39"></script>
+</body>
+</html>
