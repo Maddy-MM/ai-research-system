@@ -5527,36 +5527,10 @@ body.sidebar-open .sidebar-boundary-tab,
     color: var(--text-secondary);
     line-height: 1.75;
     white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
     margin-bottom: 1.2rem;
     flex: 1;
-    max-height: 280px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
-}
-
-.panel-body-text::-webkit-scrollbar {
-    width: 5px;
-}
-
-.panel-body-text::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: var(--radius-pill);
-}
-
-.panel-body-text::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.22);
-    border-radius: var(--radius-pill);
-}
-
-.verification-card .panel-body-text::-webkit-scrollbar-thumb:hover {
-    background: rgba(52, 211, 153, 0.65);
-}
-
-.critic-card .panel-body-text::-webkit-scrollbar-thumb:hover {
-    background: rgba(192, 132, 252, 0.65);
 }
 
 .panel-footer-meta {
