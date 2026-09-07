@@ -44,7 +44,7 @@ The system uses **LangGraph** to orchestrate planning, parallel research, writin
 
 ## Live Demo
 
-- **Backend & Web Application (Render):** [ResearchMind - Live App](https://ai-research-system-x046.onrender.com/)
+- **Backend & Web Application (Render):** [ResearchMind - Live App](https://researchmind.madhavmakwana.dev/)
 
 > **Access:** Login required — access credentials are provided privately to authorized users (demo defaults: `admin` / `secret`).
 
@@ -136,7 +136,7 @@ ResearchMind uses **JWT-based authentication**. A login is required before acces
 
 - Passwords are verified against a hardcoded admin user configured via environment variables
 - On login, the backend issues a signed JWT token
-- All protected endpoints verify the bearer token via a FastAPI OAuth2PasswordBearer dependency
+- All protected endpoints verify the token via a FastAPI `HTTPBearer` dependency
 
 **Public endpoints:** `/health`, `/auth/token`
 **Protected endpoints:** `/research/run`
