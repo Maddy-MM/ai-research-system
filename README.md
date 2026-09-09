@@ -139,7 +139,7 @@ ResearchMind uses **JWT-based authentication**. A login is required before acces
 - All protected endpoints verify the token via a FastAPI `HTTPBearer` dependency
 
 **Public endpoints:** `/health`, `/auth/token`
-**Protected endpoints:** `/research/run`
+**Protected endpoints:** `/research/run`, `/research/history`
 
 ---
 
@@ -152,7 +152,7 @@ ResearchMind uses **JWT-based authentication**. A login is required before acces
 `POST /auth/token` — Accepts form data `username` and `password`. Returns a signed JWT `access_token` on success, HTTP 401 on invalid credentials.
 
 ### Run Pipeline
-`POST /research/run` _(protected)_ — Accepts JSON `{"topic": "..."}`. Runs the full graph and returns:
+`POST /research/run` _(protected)_ — Accepts JSON `{"topic": "..."}`. Runs the full graph, persists the report to database, and returns:
 
 ```json
 {
@@ -161,11 +161,24 @@ ResearchMind uses **JWT-based authentication**. A login is required before acces
   "report": "...",
   "feedback": "...",
   "verification": "...",
-  "clarifying_question": null
+  "clarifying_question": null,
+  "critic_score": 0.8,
+  "iteration_count": 1,
+  "tokens_used": 1500,
+  "sub_questions": ["..."]
 }
 ```
 
 `report`/`feedback`/`verification` are `null` and `clarifying_question` is populated instead if the planner judged the topic too ambiguous to research directly.
+
+### Research History
+`GET /research/history` _(protected)_ — Returns recent research dossiers for the authenticated user from the database.
+
+### Clear History
+`DELETE /research/history` _(protected)_ — Clears all saved research history for the authenticated user.
+
+### Delete Single Report
+`DELETE /research/history/{request_id}` _(protected)_ — Deletes a specific research dossier by its UUID request ID.
 
 ---
 
@@ -255,15 +268,19 @@ uv sync
 
 ### Environment Variables
 
-Create a `.env` file in `backend/`:
+Create a `.env` file in the root or `backend/` directory (template provided in `.env.example`):
 
 ```ini
 JWT_SECRET_KEY=your_long_random_secret_string
 TAVILY_API_KEY=your_tavily_api_key_here
 
 OPENAI_API_KEY=your_openai_api_key_here
-# Optional model override (defaults to gpt-5-nano; e.g. gpt-5.6-luna or gpt-5-nano)
+# Optional model override (defaults to gpt-5-nano)
 OPENAI_MODEL=gpt-5-nano
+
+# Database Persistence (Supabase PostgreSQL / Cloud Postgres / Local SQLite)
+# Defaults to sqlite:///./research.db if omitted
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 
 # FastMCP tool server configuration
 MCP_SERVER_URL=http://localhost:8001/mcp

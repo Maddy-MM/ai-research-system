@@ -45,6 +45,7 @@ for key, val in {
     "topic": "",
     "topic_input": "",
     "history": [],
+    "history_initialized": False,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = val
@@ -52,6 +53,30 @@ for key, val in {
 
 def auth_headers() -> dict:
     return {"Authorization": f"Bearer {st.session_state.token}"}
+
+
+def fetch_user_history() -> list[dict]:
+    if not st.session_state.token:
+        return []
+    try:
+        res = requests.get(
+            f"{API_URL}/research/history",
+            headers=auth_headers(),
+            timeout=10,
+        )
+        if res.status_code == 200:
+            reports = res.json()
+            return [
+                {
+                    "topic": r.get("topic", "Untitled"),
+                    "results": r,
+                    "request_id": r.get("request_id", ""),
+                }
+                for r in reports
+            ]
+    except Exception:
+        pass
+    return []
 
 
 # ---------------------------------------------------------------------------
@@ -172,6 +197,10 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
+    if st.session_state.token and not st.session_state.get("history_initialized"):
+        st.session_state.history = fetch_user_history()
+        st.session_state.history_initialized = True
+
     if st.session_state.token and st.session_state.get("history"):
         st.markdown("""
             <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 1.2rem 0 0.8rem 0;"></div>
@@ -182,10 +211,10 @@ with st.sidebar:
                 letter-spacing: 0.1em;
                 text-transform: uppercase;
                 margin: 0 0 0.6rem 0;
-            ">Recent Reports</p>
+            ">Recent Reports (Saved)</p>
         """, unsafe_allow_html=True)
 
-        for idx, item in enumerate(reversed(st.session_state.history[-5:])):
+        for idx, item in enumerate(st.session_state.history[:5]):
             t_title = item.get("topic", "Untitled")
             disp = (t_title[:24] + "...") if len(t_title) > 24 else t_title
             if st.button(f"📑 {disp}", key=f"hist_{idx}_{item.get('request_id', idx)}", use_container_width=True):
@@ -195,6 +224,10 @@ with st.sidebar:
                 st.rerun()
 
         if st.button("🗑️  Clear History", key="clear_hist_btn", use_container_width=True):
+            try:
+                requests.delete(f"{API_URL}/research/history", headers=auth_headers(), timeout=10)
+            except Exception:
+                pass
             st.session_state.history = []
             st.rerun()
 
@@ -203,6 +236,8 @@ with st.sidebar:
         if st.button("⎋  Sign Out", use_container_width=True):
             for key in ("token", "results", "running", "topic", "topic_input"):
                 st.session_state[key] = None if key != "running" else False
+            st.session_state.history = []
+            st.session_state.history_initialized = False
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -969,8 +1004,8 @@ else:
             if "history" not in st.session_state or not isinstance(st.session_state.history, list):
                 st.session_state.history = []
 
-            # Prepend or append to recent history
-            st.session_state.history.append({
+            # Prepend to recent history so the latest appears first
+            st.session_state.history.insert(0, {
                 "topic": topic_to_run,
                 "timestamp": time.strftime("%H:%M"),
                 "results": payload,

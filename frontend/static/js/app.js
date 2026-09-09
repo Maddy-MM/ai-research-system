@@ -13,21 +13,29 @@
     // Disable Zoom (Desktop Ctrl/Cmd+Wheel, Ctrl/Cmd+Keys, Mobile Pinch/Gestures)
     // -------------------------------------------------------------------------
     function initZoomPrevention() {
-        // Prevent desktop mouse wheel / trackpad pinch zoom (Ctrl + wheel / Cmd + wheel)
-        window.addEventListener('wheel', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        let isModifierDown = false;
 
-        // Prevent keyboard zoom shortcuts (Ctrl/Cmd + '+', '-', '0', '=', '_')
         window.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.metaKey) {
+                isModifierDown = true;
                 const zoomKeys = ['+', '-', '=', '_', '0'];
                 const zoomCodes = ['NumpadAdd', 'NumpadSubtract', 'Numpad0', 'Equal', 'Minus', 'Digit0'];
                 if (zoomKeys.includes(e.key) || zoomCodes.includes(e.code)) {
                     e.preventDefault();
                 }
+            }
+        }, { passive: false });
+
+        window.addEventListener('keyup', (e) => {
+            if (!e.ctrlKey && !e.metaKey) {
+                isModifierDown = false;
+            }
+        }, { passive: true });
+
+        // Intercept wheel only when Ctrl/Cmd is engaged so normal scroll is 100% native
+        window.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey || isModifierDown) {
+                e.preventDefault();
             }
         }, { passive: false });
 
@@ -1484,6 +1492,32 @@
         toggleSidebar(true);
     }
 
+    async function fetchServerHistory() {
+        if (!state.token || state.token === 'demo-token') return;
+        try {
+            const res = await fetch('/research/history', {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
+            if (res.ok) {
+                const list = await res.json();
+                if (Array.isArray(list) && list.length > 0) {
+                    state.history = list.map(item => ({
+                        topic: item.topic || 'Untitled',
+                        timestamp: item.timestamp || '',
+                        results: item,
+                        request_id: item.request_id || ''
+                    }));
+                    localStorage.setItem('rm_history', JSON.stringify(state.history));
+                    renderHistory();
+                }
+            }
+        } catch (e) {
+            // Fall back gracefully
+        }
+    }
+
     function showAuthenticatedView() {
         dom.viewLogin.classList.add('hidden');
         dom.viewAuth.classList.remove('hidden');
@@ -1495,6 +1529,8 @@
         } else {
             toggleSidebar(true);
         }
+
+        fetchServerHistory();
 
         const isResults = dom.stageResults && !dom.stageResults.classList.contains('hidden');
         if (isResults) {
@@ -1856,10 +1892,20 @@
 
         // History Clear
         if (dom.btnClearHistory) {
-            dom.btnClearHistory.addEventListener('click', () => {
+            dom.btnClearHistory.addEventListener('click', async () => {
                 if (!state.history || state.history.length === 0) return;
                 state.history = [];
                 localStorage.removeItem('rm_history');
+                if (state.token && state.token !== 'demo-token') {
+                    try {
+                        await fetch('/research/history', {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${state.token}`
+                            }
+                        });
+                    } catch (e) {}
+                }
                 renderHistory();
                 showToast('All recent enquiries cleared');
             });
@@ -2449,11 +2495,25 @@
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             `;
-            delBtn.addEventListener('click', (e) => {
+            delBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
+                const reqId = h.request_id || (h.results && h.results.request_id);
                 state.history.splice(index, 1);
                 localStorage.setItem('rm_history', JSON.stringify(state.history));
                 renderHistory();
+
+                if (reqId && state.token && state.token !== 'demo-token') {
+                    try {
+                        await fetch(`/research/history/${encodeURIComponent(reqId)}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${state.token}`
+                            }
+                        });
+                    } catch (err) {
+                        console.error('Failed to delete item from server:', err);
+                    }
+                }
             });
 
             row.appendChild(btn);

@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.config import get_settings
+from src.database import init_db
 from src.logging import get_logger
 from api.routes_auth import router as auth_router
 from api.routes_research import router as research_router
@@ -17,6 +18,11 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application starting", extra={"app": settings.APP_NAME})
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
     yield
     logger.info("Application shutting down")
 

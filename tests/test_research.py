@@ -128,3 +128,59 @@ async def test_root_serves_jinja_index(client):
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
     assert "ResearchMind" in response.text
+
+
+@pytest.mark.anyio
+async def test_research_history_and_clear(client, auth_headers, mock_pipeline):
+    # Run a research query
+    post_res = await client.post(
+        "/research/run",
+        json={"topic": "Quantum Computing"},
+        headers=auth_headers,
+    )
+    assert post_res.status_code == 200
+
+    # Fetch history
+    history_res = await client.get("/research/history", headers=auth_headers)
+    assert history_res.status_code == 200
+    history = history_res.json()
+    assert len(history) >= 1
+    assert any(h["topic"] == "Quantum Computing" for h in history)
+
+    # Clear history
+    clear_res = await client.delete("/research/history", headers=auth_headers)
+    assert clear_res.status_code == 200
+    assert clear_res.json()["status"] == "ok"
+
+    # Verify history is empty
+    history_res_after = await client.get("/research/history", headers=auth_headers)
+    assert history_res_after.status_code == 200
+    assert len(history_res_after.json()) == 0
+
+
+@pytest.mark.anyio
+async def test_delete_individual_history_item(client, auth_headers, mock_pipeline):
+    # Run two research queries
+    res1 = await client.post("/research/run", json={"topic": "Topic One"}, headers=auth_headers)
+    res2 = await client.post("/research/run", json={"topic": "Topic Two"}, headers=auth_headers)
+    assert res1.status_code == 200
+    assert res2.status_code == 200
+
+    req_id1 = res1.json()["request_id"]
+    req_id2 = res2.json()["request_id"]
+
+    # Delete only the first item
+    del_res = await client.delete(f"/research/history/{req_id1}", headers=auth_headers)
+    assert del_res.status_code == 200
+    assert del_res.json()["status"] == "ok"
+
+    # Verify first is gone, second remains
+    history_res = await client.get("/research/history", headers=auth_headers)
+    assert history_res.status_code == 200
+    topics = [h["topic"] for h in history_res.json()]
+    assert "Topic One" not in topics
+    assert "Topic Two" in topics
+
+    # Trying to delete already deleted item returns 404
+    del_res_404 = await client.delete(f"/research/history/{req_id1}", headers=auth_headers)
+    assert del_res_404.status_code == 404

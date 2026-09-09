@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     LANGCHAIN_PROJECT: str = "researchmind"
     LANGCHAIN_ENDPOINT: str = "https://api.smith.langchain.com"
 
+    DATABASE_URL: str = "sqlite:///./research.db"
+
     DEMO_USERNAME: str = "admin"
     DEMO_PASSWORD: str = "secret"
 

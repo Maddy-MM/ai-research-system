@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[oc]
+*.db
 build/
 dist/
 wheels/

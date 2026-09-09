@@ -9,8 +9,14 @@ import pytest
 from httpx import AsyncClient, ASGITransport
 from unittest.mock import patch, AsyncMock
 
-from backend.main import app
-from backend.src.auth import create_access_token
+from main import app
+from src.auth import create_access_token
+from src.database import init_db
+
+
+@pytest.fixture(autouse=True)
+def setup_test_db():
+    init_db()
 
 
 @pytest.fixture
