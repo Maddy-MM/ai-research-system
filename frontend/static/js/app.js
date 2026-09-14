@@ -1342,9 +1342,9 @@
 
         // Sidebar
         sidebar: document.getElementById('app-sidebar'),
-        btnCollapseSidebar: document.getElementById('btn-collapse-sidebar'),
-        btnCollapseSidebarRail: document.getElementById('btn-collapse-sidebar-rail'),
         btnProminentOpenSidebar: document.getElementById('btn-prominent-open-sidebar'),
+        btnCollapseSidebar: document.getElementById('btn-prominent-open-sidebar'),
+        btnCollapseSidebarRail: document.getElementById('btn-collapse-sidebar-rail'),
         btnSidebarNewSearch: document.getElementById('btn-sidebar-new-search'),
         btnExpandSidebar: document.getElementById('btn-expand-sidebar'),
         btnExpandSidebarResults: document.getElementById('btn-expand-sidebar-results'),
@@ -1467,10 +1467,8 @@
             document.body.classList.remove('sidebar-open');
             document.body.classList.add('sidebar-collapsed');
             if (dom.btnProminentOpenSidebar) {
-                dom.btnProminentOpenSidebar.classList.remove('hidden');
-                dom.btnProminentOpenSidebar.style.animation = 'none';
-                void dom.btnProminentOpenSidebar.offsetWidth;
-                dom.btnProminentOpenSidebar.style.animation = '';
+                dom.btnProminentOpenSidebar.setAttribute('title', 'Expand Workspace (Ctrl+\\)');
+                dom.btnProminentOpenSidebar.setAttribute('aria-label', 'Expand Workspace');
             }
             if (dom.btnExpandSidebar) dom.btnExpandSidebar.classList.remove('hidden');
             if (dom.btnExpandSidebarResults) dom.btnExpandSidebarResults.classList.remove('hidden');
@@ -1479,7 +1477,10 @@
             dom.sidebar.classList.remove('collapsed');
             document.body.classList.add('sidebar-open');
             document.body.classList.remove('sidebar-collapsed');
-            if (dom.btnProminentOpenSidebar) dom.btnProminentOpenSidebar.classList.add('hidden');
+            if (dom.btnProminentOpenSidebar) {
+                dom.btnProminentOpenSidebar.setAttribute('title', 'Collapse Workspace (Ctrl+\\)');
+                dom.btnProminentOpenSidebar.setAttribute('aria-label', 'Collapse Workspace');
+            }
             if (dom.btnExpandSidebar) dom.btnExpandSidebar.classList.add('hidden');
             if (dom.btnExpandSidebarResults) dom.btnExpandSidebarResults.classList.add('hidden');
             localStorage.setItem('rm_sidebar_collapsed_v2', 'false');
@@ -1670,15 +1671,12 @@
             });
         }
 
-        // Sidebar Collapse / Expand Toggles & Pull Tab
-        if (dom.btnCollapseSidebar) {
-            dom.btnCollapseSidebar.addEventListener('click', () => toggleSidebar(true));
-        }
-        if (dom.btnCollapseSidebarRail) {
-            dom.btnCollapseSidebarRail.addEventListener('click', () => toggleSidebar(true));
-        }
+        // Multipurpose Sidebar Floating Dock Toggle (Open & Matching Close)
         if (dom.btnProminentOpenSidebar) {
-            dom.btnProminentOpenSidebar.addEventListener('click', () => toggleSidebar(false));
+            dom.btnProminentOpenSidebar.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSidebar();
+            });
         }
         if (dom.btnSidebarNewSearch) {
             dom.btnSidebarNewSearch.addEventListener('click', () => {
@@ -1713,7 +1711,7 @@
         // Close sidebar on compact screens when clicking outside the drawer
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768 && document.body.classList.contains('sidebar-open')) {
-                if (dom.sidebar && !dom.sidebar.contains(e.target) && !e.target.closest('.btn-mobile-menu') && !e.target.closest('.btn-sidebar-toggle-top') && !e.target.closest('.btn-topbar-toggle') && !e.target.closest('#btn-prominent-open-sidebar')) {
+                if (dom.sidebar && !dom.sidebar.contains(e.target) && !e.target.closest('.btn-mobile-menu') && !e.target.closest('.btn-sidebar-toggle-top') && !e.target.closest('.btn-topbar-toggle') && !e.target.closest('#sidebar-bookmark-toggle') && !e.target.closest('#btn-prominent-open-sidebar')) {
                     toggleSidebar(true);
                 }
             }

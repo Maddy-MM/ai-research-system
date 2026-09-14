@@ -808,51 +808,126 @@ body {
 }
 
 @media (max-width: 960px) {
-    .login-screen-layout {
-        height: auto;
-        max-height: none;
-        overflow-y: auto;
-        padding: 2rem 1.5rem;
+    /* Strict view isolation to prevent view stacking */
+    #view-login.hidden,
+    #view-authenticated.hidden,
+    .screen-view.hidden,
+    .stage-view.hidden,
+    .hidden {
+        display: none !important;
+    }
+
+    .login-screen-layout:not(.hidden) {
+        height: 100% !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        padding: 1.75rem 1.5rem 1.25rem 1.5rem !important;
+        gap: 0 !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .login-top-bar {
+        margin-bottom: 1.25rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .login-main-stage {
+        flex: 0 0 auto !important;
+        min-height: auto !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        width: 100% !important;
     }
 
     .login-stage-inner {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 1.25rem !important;
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
     }
-    
+
     .login-hero-pane {
-        align-items: center;
-        text-align: center;
+        align-items: center !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin-bottom: 0 !important;
     }
 
-    .hero-features-list {
-        max-width: 100%;
-        align-items: center;
+    .login-hero-pane .eyebrow-pill {
+        margin-bottom: 0.65rem !important;
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.75rem !important;
     }
 
-    .hero-tech-strip {
-        justify-content: center;
-    }
-    
-    .hero-headline {
-        font-size: 1.9rem;
+    .login-hero-pane .hero-headline {
+        font-size: 1.65rem !important;
+        line-height: 1.22 !important;
+        margin-bottom: 0.5rem !important;
     }
 
-    .hero-description {
-        max-width: 100%;
+    .login-hero-pane .hero-description {
+        font-size: 0.85rem !important;
+        line-height: 1.45 !important;
+        margin-bottom: 0 !important;
+        max-width: 400px !important;
+    }
+
+    /* In single-column stack on resized window, hide marketing bullets to prevent vertical explosion & overlap */
+    .login-hero-pane .hero-features-list,
+    .login-hero-pane .hero-tech-strip {
+        display: none !important;
     }
 
     .login-form-pane {
-        justify-content: center;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
     }
 
     .auth-console-box {
-        max-width: 420px;
+        width: 100% !important;
+        max-width: 420px !important;
+        min-height: auto !important;
+        padding: 1.85rem 1.6rem !important;
+        border-radius: var(--radius-lg) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .auth-box-header {
+        margin-bottom: 1.25rem !important;
+    }
+
+    .auth-title {
+        font-size: 1.35rem !important;
+    }
+
+    .auth-subtitle {
+        font-size: 0.8rem !important;
+        margin-top: 0.2rem !important;
+    }
+
+    .auth-console-box .form-group {
+        gap: 1rem !important;
     }
 
     .login-bottom-dock {
-        flex-wrap: wrap;
-        gap: 0.75rem;
+        margin-top: auto !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 0.75rem !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 0.5rem 0.85rem !important;
+        flex-shrink: 0 !important;
     }
 }
 
@@ -1100,7 +1175,7 @@ body {
 }
 
 /* ==========================================================================
-   SLEEK OBSIDIAN FLOATING DOCK TOGGLE (Open Sidebar)
+   SLEEK OBSIDIAN FLOATING DOCK TOGGLE (Multipurpose Open & Close)
    ========================================================================== */
 .sidebar-floating-toggle,
 .sidebar-boundary-tab {
@@ -1122,7 +1197,12 @@ body {
     color: var(--brand-orange-light);
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: all var(--transition-fast);
+    transition: left 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                border-radius 0.2s ease,
+                background var(--transition-fast),
+                border-color var(--transition-fast),
+                transform var(--transition-fast),
+                box-shadow var(--transition-fast);
     outline: none;
     user-select: none;
 }
@@ -1139,6 +1219,37 @@ body {
 .sidebar-floating-toggle:active,
 .sidebar-boundary-tab:active {
     transform: scale(0.95);
+}
+
+/* Position and attachment when sidebar is OPEN: Attached to sidebar edge like a tab */
+body.sidebar-open .sidebar-floating-toggle,
+body.sidebar-open .sidebar-boundary-tab {
+    left: 289px;
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    transform-origin: left center;
+    box-shadow: 4px 2px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+body.sidebar-open .sidebar-floating-toggle:hover,
+body.sidebar-open .sidebar-boundary-tab:hover {
+    border-left: none;
+    transform: scale(1.05);
+    transform-origin: left center;
+    box-shadow: 6px 2px 20px rgba(0, 0, 0, 0.5), 0 0 14px rgba(255, 126, 41, 0.35);
+}
+
+/* Position when sidebar is COLLAPSED: Original position at left: 14px with complete rounded border */
+body.sidebar-collapsed .sidebar-floating-toggle,
+body.sidebar-collapsed .sidebar-boundary-tab,
+body:not(.sidebar-open) .sidebar-floating-toggle,
+body:not(.sidebar-open) .sidebar-boundary-tab {
+    left: 14px;
+    border-radius: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .floating-toggle-icon {
@@ -1169,6 +1280,26 @@ body {
     box-shadow: 0 0 6px rgba(16, 185, 129, 0.9);
 }
 
+/* Toggle Icon Swapping: Open Icon (arrow right) vs Matching Closing Icon (arrow left) */
+.sidebar-floating-toggle .toggle-icon-close {
+    display: none;
+}
+.sidebar-floating-toggle .toggle-icon-open {
+    display: flex;
+}
+
+body.sidebar-open .sidebar-floating-toggle .toggle-icon-open {
+    display: none !important;
+}
+body.sidebar-open .sidebar-floating-toggle .toggle-icon-close {
+    display: flex !important;
+}
+
+#view-authenticated.hidden .sidebar-floating-toggle,
+body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
+    display: none !important;
+}
+
 /* Ensure smooth transition when sidebar toggles */
 .stage-top-bar-inner,
 .results-top-bar-inner {
@@ -1180,52 +1311,6 @@ body {
     body.sidebar-collapsed .results-top-bar-inner {
         padding-left: calc(0.85rem + 34px) !important;
     }
-}
-
-/* Hide toggle when sidebar is open or explicitly hidden */
-body.sidebar-open .sidebar-floating-toggle,
-body.sidebar-open .sidebar-boundary-tab,
-.sidebar-floating-toggle.hidden,
-.sidebar-boundary-tab.hidden {
-    display: none !important;
-}
-
-/* ==========================================================================
-   MINIMALIST SIDEBAR EDGE RAIL COLLAPSE TAB
-   ========================================================================== */
-.sidebar-collapse-rail-tab {
-    position: absolute;
-    top: 14px;
-    right: -13px;
-    z-index: 25;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(20, 20, 32, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    color: var(--text-muted);
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    transition: all var(--transition-fast);
-    outline: none;
-    user-select: none;
-}
-
-.sidebar-collapse-rail-tab:hover {
-    background: rgba(255, 126, 41, 0.18);
-    border-color: rgba(255, 126, 41, 0.6);
-    color: var(--brand-orange-light);
-    box-shadow: 0 0 12px rgba(255, 126, 41, 0.4);
-    transform: scale(1.1);
-}
-
-.sidebar-collapse-rail-tab:active {
-    transform: scale(0.95);
 }
 
 /* Top-Right Telemetry / Action Toggle Button */
@@ -7068,7 +7153,7 @@ body.sidebar-open .sidebar-boundary-tab,
         font-size: 0.65rem !important;
     }
 
-    /* Prominent Sidebar Open Toggle Button on Mobile */
+    /* Prominent Sidebar Open/Close Toggle Button on Mobile */
     .sidebar-floating-toggle,
     .sidebar-boundary-tab {
         position: fixed !important;
@@ -7076,7 +7161,7 @@ body.sidebar-open .sidebar-boundary-tab,
         left: 10px !important;
         width: 34px !important;
         height: 34px !important;
-        z-index: 120 !important;
+        z-index: 1050 !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -7087,6 +7172,27 @@ body.sidebar-open .sidebar-boundary-tab,
         border: 1px solid rgba(255, 126, 41, 0.35) !important;
         color: var(--brand-orange) !important;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 126, 41, 0.2) !important;
+        transition: left 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease !important;
+    }
+
+    body.sidebar-open .sidebar-floating-toggle,
+    body.sidebar-open .sidebar-boundary-tab {
+        left: calc(min(300px, 85vw) - 1px) !important;
+        border-left: none !important;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: 8px !important;
+        border-bottom-right-radius: 8px !important;
+        transform-origin: left center !important;
+    }
+
+    body.sidebar-collapsed .sidebar-floating-toggle,
+    body.sidebar-collapsed .sidebar-boundary-tab,
+    body:not(.sidebar-open) .sidebar-floating-toggle,
+    body:not(.sidebar-open) .sidebar-boundary-tab {
+        left: 10px !important;
+        border-radius: 8px !important;
+        border-left: 1px solid rgba(255, 126, 41, 0.35) !important;
     }
 
     .sidebar-floating-toggle:hover,
@@ -7096,13 +7202,6 @@ body.sidebar-open .sidebar-boundary-tab,
         background: rgba(28, 28, 44, 0.98) !important;
         border-color: rgba(255, 126, 41, 0.7) !important;
         color: #FFA05E !important;
-    }
-
-    body.sidebar-open .sidebar-floating-toggle,
-    body.sidebar-open .sidebar-boundary-tab,
-    .sidebar-floating-toggle.hidden,
-    .sidebar-boundary-tab.hidden {
-        display: none !important;
     }
 
     .app-main-stage {
