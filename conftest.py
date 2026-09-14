@@ -7,16 +7,31 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend"))
 
 import pytest
 from httpx import AsyncClient, ASGITransport
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 
 from main import app
-from src.auth import create_access_token
-from src.database import init_db
+from src.auth import create_access_token, get_user, create_user, hash_password
+from src.database import init_db, SessionLocal
+from src.config import get_settings
 
 
 @pytest.fixture(autouse=True)
 def setup_test_db():
     init_db()
+    settings = get_settings()
+    configured_user = os.environ.get("DEFAULT_USER") or getattr(settings, "effective_username", "admin")
+    password = os.environ.get("DEFAULT_PASS") or getattr(settings, "effective_password", "secret")
+    db = SessionLocal()
+    try:
+        for uname in {configured_user, "admin"}:
+            user = get_user(db, uname)
+            if not user:
+                create_user(db, uname, password)
+            else:
+                user.hashed_password = hash_password(password)
+                db.commit()
+    finally:
+        db.close()
 
 
 @pytest.fixture
@@ -35,7 +50,8 @@ async def client():
 
 @pytest.fixture
 def valid_token():
-    return create_access_token(username="admin")
+    settings = get_settings()
+    return create_access_token(username=settings.effective_username)
 
 
 @pytest.fixture

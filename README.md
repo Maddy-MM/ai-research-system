@@ -132,14 +132,16 @@ Two nodes connect as MCP clients (`langchain-mcp-adapters`), each an independent
 
 ## Authentication
 
-ResearchMind uses **JWT-based authentication**. A login is required before accessing any part of the application.
+ResearchMind uses **database-backed JWT Bearer authentication** with **bcrypt password hashing**:
 
-- Passwords are verified against a hardcoded admin user configured via environment variables
-- On login, the backend issues a signed JWT token
-- All protected endpoints verify the token via a FastAPI `HTTPBearer` dependency
+- **Database-Backed Users:** SQLAlchemy `User` model (`users` table) storing unique indexed usernames and salted bcrypt password hashes.
+- **Startup Synchronization:** FastAPI lifespan handler automatically initializes database tables and provisions/synchronizes configured credentials (`DEFAULT_USER`/`DEMO_USERNAME`, `DEFAULT_PASS`/`DEMO_PASSWORD`) on boot.
+- **Bcrypt Security:** Passwords hashed and validated using `passlib.context.CryptContext(schemes=["bcrypt"])`.
+- **Bearer Dependency:** Protected routes resolve the full `User` database entity via FastAPI's `HTTPBearer` dependency (`get_current_user`).
+- **Flexible Endpoints:** Supports both JSON payloads (`POST /login`, `POST /auth/login`) and URL-encoded form data (`POST /auth/token`).
 
-**Public endpoints:** `/health`, `/auth/token`
-**Protected endpoints:** `/research/run`, `/research/history`
+**Public endpoints:** `/` (Web Interface), `/health`, `/metrics`, `/login`, `/auth/login`, `/auth/token`  
+**Protected endpoints:** `/research/run`, `/research/history`, `/research/history/{request_id}`
 
 ---
 
@@ -148,8 +150,11 @@ ResearchMind uses **JWT-based authentication**. A login is required before acces
 ### Health Check
 `GET /health` — Returns `{"status": "ok"}`.
 
-### Login
-`POST /auth/token` — Accepts form data `username` and `password`. Returns a signed JWT `access_token` on success, HTTP 401 on invalid credentials.
+### Login (JSON)
+`POST /login` (or `POST /auth/login`) — Accepts JSON `{"username": "...", "password": "..."}`. Returns `{"access_token": token, "token_type": "bearer"}` on success, HTTP 401 on invalid credentials.
+
+### Login (Form / OAuth2 Compatible)
+`POST /auth/token` — Accepts form data (or JSON) `username` and `password`. Returns `{"access_token": token, "token_type": "bearer"}`.
 
 ### Run Pipeline
 `POST /research/run` _(protected)_ — Accepts JSON `{"topic": "..."}`. Runs the full graph, persists the report to database, and returns:
@@ -209,8 +214,10 @@ ai-research-system/
 │   ├── .env / .env.example
 │   │
 │   ├── src/
-│   │   ├── auth.py            # JWT token creation and verification
-│   │   ├── config.py          # Pydantic BaseSettings, model overrides & LangSmith config
+│   │   ├── auth.py            # Bcrypt password hashing, JWT creation, get_current_user HTTPBearer
+│   │   ├── config.py          # Pydantic BaseSettings, model overrides, auth & LangSmith config
+│   │   ├── database.py        # SQLAlchemy engine, SessionLocal, init_db() migration
+│   │   ├── models.py          # User & ResearchReport SQLAlchemy models
 │   │   ├── logging.py         # Structured JSON logging
 │   │   ├── metrics.py         # Prometheus histogram and counter metrics
 │   │   │
@@ -226,26 +233,28 @@ ai-research-system/
 │   │       └── tools_impl.py  # web_search, scrape_url, arxiv_search, calculator
 │   │
 │   └── api/
-│       ├── routes_auth.py     # /auth/token endpoint
-│       └── routes_research.py # /research/run endpoint
+│       ├── routes_auth.py     # /login, /auth/login, /auth/token endpoints
+│       └── routes_research.py # /research/run, /research/history endpoints
 │
 ├── frontend/
 │   ├── templates/
 │   │   └── index.html         # Jinja2 production single-page application (Screens 0, 1, 2)
 │   ├── static/
 │   │   ├── css/style.css      # Scholar-Tech design system & cosmic particle styling
-│   │   └── js/app.js          # Pure ES6+ client state, auth, history, and marked.js rendering
-│   ├── app.py                 # Legacy Streamlit prototype
-│   └── requirements.txt
+│   │   ├── js/app.js          # Pure ES6+ client state, auth, history, and marked.js rendering
+│   │   └── data/
+│   │       └── default_report.md # Initial fallback template dossier
+│   ├── app.py                 # Legacy Streamlit prototype (reference only)
+│   └── requirements.txt       # Legacy Streamlit dependencies
 │
 ├── tests/
-│   ├── test_auth.py           # JWT auth and invalid credentials tests
-│   └── test_research.py       # Pipeline execution, token guards, and clarification tests
+│   ├── test_auth.py           # Database auth, bcrypt hashing, JSON & form login tests
+│   └── test_research.py       # Pipeline execution, token guards, and user history tests
 │
 ├── monitoring/
 │   └── prometheus.yml
 │
-├── conftest.py                # Test client and mock pipeline fixtures
+├── conftest.py                # Test client, DB setup fixture, and mock pipeline fixtures
 ├── Dockerfile                 # Multi-stage build for unified deployment
 ├── pyproject.toml
 └── README.md
@@ -271,12 +280,16 @@ uv sync
 Create a `.env` file in the root or `backend/` directory (template provided in `.env.example`):
 
 ```ini
-JWT_SECRET_KEY=your_long_random_secret_string
+JWT_SECRET_KEY=your_long_random_secret_string   # or JWT_SECRET
 TAVILY_API_KEY=your_tavily_api_key_here
 
 OPENAI_API_KEY=your_openai_api_key_here
 # Optional model override (defaults to gpt-5-nano)
 OPENAI_MODEL=gpt-5-nano
+
+# Configured User (provisioned and password-synced in DB on startup)
+DEMO_USERNAME=admin                            # or DEFAULT_USER
+DEMO_PASSWORD=secret                           # or DEFAULT_PASS
 
 # Database Persistence (Supabase PostgreSQL / Cloud Postgres / Local SQLite)
 # Defaults to sqlite:///./research.db if omitted
@@ -297,20 +310,30 @@ LANGCHAIN_PROJECT=researchmind
 
 ## How to Run
 
-Two processes (or single container via Docker):
+### 1. Production (Unified FastAPI Web App)
+
+Two processes are required for local development:
 
 ```bash
-# terminal 1 — MCP tool server
+# Terminal 1 — FastMCP Tool Server
 cd backend
 uv run python -m src.mcp_server.server
-
-# terminal 2 — orchestrator
-cd backend
-uv run uvicorn main:app --reload
 ```
 
 ```bash
-# frontend
+# Terminal 2 — FastAPI Orchestrator & Web Server
+cd backend
+uv run uvicorn main:app --reload --port 8000
+```
+
+Once running, navigate to **`http://localhost:8000`** in your browser to access the Scholar-Tech research cockpit.
+
+### 2. Legacy Streamlit Prototype (Optional Reference)
+
+The original Streamlit prototype is preserved for comparison:
+
+```bash
+# Terminal 3 (Optional) — Legacy Streamlit Prototype
 cd frontend
 uv run streamlit run app.py
 ```
@@ -335,7 +358,10 @@ Deferred since running 100 full pipeline executions has a real OpenAI cost — t
 uv run pytest
 ```
 
-Uses `httpx` with `ASGITransport` to test FastAPI endpoints in-process. The `mock_pipeline` fixture patches `run_research_pipeline` so tests never call any external API.
+The test suite includes **18 unit and integration tests** executed with `pytest` and `httpx` (`ASGITransport`):
+- **Database & Auth:** Bcrypt password hashing/validation, database `User` lookups, JWT issuance, JSON login (`/login`), OAuth2 form login (`/auth/token`), and missing/invalid field validation (HTTP 422).
+- **Security Guards:** Bearer token authentication, malformed/missing headers, invalid/expired token rejection (HTTP 401).
+- **Research Pipeline & Persistence:** Mocked LangGraph pipeline runs (`/research/run`), topic validation, clarifying question handling, and user-scoped report history retrieval/deletion (`/research/history`).
 
 ---
 
@@ -385,11 +411,13 @@ Uses `httpx` with `ASGITransport` to test FastAPI endpoints in-process. The `moc
 - Model Context Protocol (`mcp`, `langchain-mcp-adapters`, FastMCP)
 - OpenAI API (LLM, reasoning model support), Tavily Search API, arXiv API
 - BeautifulSoup4
-- Prometheus + prometheus-fastapi-instrumentator
+- PostgreSQL (Supabase pooler) / SQLite via SQLAlchemy 2.0
+- Bcrypt password hashing (`passlib[bcrypt]`, `bcrypt==4.0.1`)
+- JWT authentication (`python-jose[cryptography]`)
+- Prometheus + `prometheus-fastapi-instrumentator`
 - LangSmith (optional tracing)
-- JWT authentication (python-jose)
-- Structured JSON logging (python-json-logger)
-- uv package manager
+- Structured JSON logging (`python-json-logger`)
+- `uv` package manager
 
 ### Frontend
 - Pure Vanilla Web (HTML5, CSS3, ES6+ JavaScript)

@@ -6,7 +6,6 @@ from src.config import get_settings
 settings = get_settings()
 
 db_url = settings.DATABASE_URL
-# Normalise postgres:// -> postgresql:// for SQLAlchemy compatibility
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
@@ -33,6 +32,35 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def init_db() -> None:
-    # Import all models before creating tables
     import src.models  # noqa: F401
+
     Base.metadata.create_all(bind=engine)
+
+    try:
+        from sqlalchemy import text
+
+        with engine.connect() as conn:
+            if engine.dialect.name == "postgresql":
+                conn.execute(
+                    text(
+                        "ALTER TABLE research_reports ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id);"
+                    )
+                )
+                conn.commit()
+            elif engine.dialect.name == "sqlite":
+                res = conn.execute(
+                    text("PRAGMA table_info(research_reports)")
+                ).fetchall()
+                cols = [r[1] for r in res]
+                if cols and "user_id" not in cols:
+                    conn.execute(
+                        text(
+                            "ALTER TABLE research_reports ADD COLUMN user_id INTEGER REFERENCES users(id);"
+                        )
+                    )
+                    conn.commit()
+    except Exception:
+        pass
+
+
+from src.models import User  # noqa: E402, F401

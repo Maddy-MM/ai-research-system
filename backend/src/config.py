@@ -32,6 +32,21 @@ class Settings(BaseSettings):
 
     DEMO_USERNAME: str = "admin"
     DEMO_PASSWORD: str = "secret"
+    DEFAULT_USER: str | None = None
+    DEFAULT_PASS: str | None = None
+    JWT_SECRET: str | None = None
+
+    @property
+    def effective_username(self) -> str:
+        return self.DEFAULT_USER or self.DEMO_USERNAME
+
+    @property
+    def effective_password(self) -> str:
+        return self.DEFAULT_PASS or self.DEMO_PASSWORD
+
+    @property
+    def effective_jwt_secret(self) -> str:
+        return self.JWT_SECRET or self.JWT_SECRET_KEY
 
     model_config = ConfigDict(
         env_file=[

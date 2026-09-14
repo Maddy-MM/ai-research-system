@@ -2078,6 +2078,16 @@ body.sidebar-open .sidebar-boundary-tab,
     }
 }
 
+/* Touch devices ONLY (iPad / tablets): allow smooth touch scrolling so flowchart is not cut off */
+@media (hover: none) and (pointer: coarse) {
+    .app-main-stage:has(#stage-search:not(.hidden)),
+    .app-main-stage.search-active {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+    }
+}
+
 /* Results stage ALWAYS allows smooth natural vertical scrolling */
 .app-main-stage:has(#stage-results:not(.hidden)) {
     overflow-y: auto !important;
@@ -2536,11 +2546,11 @@ body.sidebar-open .sidebar-boundary-tab,
 }
 
 .search-box-card {
-    padding: 0.6rem 0.8rem;
-    min-height: 60px;
+    padding: 0.7rem 0.95rem;
+    min-height: 70px;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
     background: rgba(16, 17, 28, 0.88);
     backdrop-filter: blur(28px) saturate(1.3);
     -webkit-backdrop-filter: blur(28px) saturate(1.3);
@@ -2566,7 +2576,7 @@ body.sidebar-open .sidebar-boundary-tab,
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.65rem;
 }
 
 .search-icon-box {
@@ -2589,17 +2599,17 @@ body.sidebar-open .sidebar-boundary-tab,
 
 .search-input {
     width: 100%;
-    padding: 0.75rem 0.5rem;
+    padding: 0.82rem 0.6rem;
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.98rem;
+    font-size: 1.01rem;
     font-family: inherit;
     letter-spacing: -0.01em;
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.32);
 }
 
 .search-input:focus {
@@ -2610,8 +2620,8 @@ body.sidebar-open .sidebar-boundary-tab,
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-muted);
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2642,8 +2652,8 @@ body.sidebar-open .sidebar-boundary-tab,
 }
 
 .btn-search {
-    padding: 0.75rem 1.45rem;
-    font-size: 0.88rem;
+    padding: 0.8rem 1.55rem;
+    font-size: 0.90rem;
     font-weight: 700;
     flex-shrink: 0;
     border-radius: var(--radius-md);
@@ -2714,40 +2724,6 @@ body.sidebar-open .sidebar-boundary-tab,
 
 .search-box-card.input-guard-pulse {
     animation: inputGuardGlow 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/* Capabilities Bar */
-.search-capabilities-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 1rem;
-    margin-top: 0.85rem;
-    padding-left: 0.4rem;
-}
-
-.capability-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-.cap-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-}
-
-.cap-dot.orange { background: var(--brand-orange); box-shadow: 0 0 6px rgba(255, 126, 41, 0.6); }
-.cap-dot.blue { background: #3B82F6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.6); }
-.cap-dot.green { background: #10B981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
-
-.capability-sep {
-    color: rgba(255, 255, 255, 0.2);
-    font-size: 0.72rem;
 }
 
 /* Quick Inquiries (Prompt Shelf) */
@@ -6814,6 +6790,29 @@ body.sidebar-open .sidebar-boundary-tab,
             font-size: 0.72rem;
             font-weight: 600;
         }
+        .results-actions .telemetry-pill span:not(.status-pulse-dot) {
+            display: none !important;
+        }
+        .results-actions .telemetry-pill::after {
+            content: 'Complete';
+            font-size: 0.68rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .stage-telemetry .telemetry-pill span:not(.status-pulse-dot) {
+            display: none !important;
+        }
+        .stage-telemetry .telemetry-pill::after {
+            content: '5 Ready';
+            font-size: 0.68rem;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .results-actions .telemetry-pill {
+            display: none !important;
+        }
     }
 
     /* --------------------------------------------------------------------------
@@ -6942,6 +6941,16 @@ body.sidebar-open .sidebar-boundary-tab,
         padding: 0 !important;
         margin-bottom: 1.6rem !important;
         flex-shrink: 0 !important;
+        justify-content: center !important;
+    }
+
+    .login-top-bar .telemetry-capsule-pill {
+        display: none !important;
+    }
+
+    .login-top-bar .brand-signature {
+        justify-content: center !important;
+        margin: 0 auto !important;
     }
 
     .login-main-stage {
@@ -7098,8 +7107,10 @@ body.sidebar-open .sidebar-boundary-tab,
 
     .app-main-stage {
         height: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
         padding: 0;
         width: 100%;
     }
@@ -7107,6 +7118,64 @@ body.sidebar-open .sidebar-boundary-tab,
     .stage-container {
         padding: 1.25rem 1rem 2.5rem 1rem;
     }
+
+    /* --------------------------------------------------------------------------
+       SCREEN 1: INQUIRY CONSOLE & DAG SCHEMATIC MOBILE OPTIMIZATIONS
+       -------------------------------------------------------------------------- */
+    .hero-title {
+        font-size: clamp(1.45rem, 5.8vw, 1.85rem) !important;
+        line-height: 1.22 !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+    }
+
+    .hero-desc {
+        font-size: 0.84rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* DAG Circuit Schematic Clearance: ensure right-side buffer for feedback arc */
+    .studio-engine-zone {
+        width: 100% !important;
+        padding: 0.5rem 0 !important;
+        overflow: visible !important;
+    }
+
+    .dag-open-schematic {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding-right: 32px !important;
+        padding-left: 4px !important;
+    }
+
+    .schematic-spine {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .schematic-badge-pill {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        padding: 0.3rem 0.75rem !important;
+        max-width: 100% !important;
+        text-align: center !important;
+    }
+
+    .dag-parallel-row {
+        gap: 0.65rem !important;
+    }
+
+    .dag-node-pod.pod-parallel {
+        padding: 0.6rem 0.65rem !important;
+    }
+
+    .dag-node-pod.pod-parallel .dag-pod-tag {
+        padding: 0.12rem 0.45rem !important;
+        font-size: 0.58rem !important;
+    }
+
+
 
     /* --------------------------------------------------------------------------
        SCREEN 2: RESULTS VIEW & DOSSIER MOBILE OPTIMIZATIONS
@@ -7315,6 +7384,46 @@ body.sidebar-open .sidebar-boundary-tab,
 
     .subquestions-body {
         padding: 0.85rem 0.95rem !important;
+        gap: 0.75rem !important;
+    }
+
+    .track-item {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        align-items: center !important;
+        row-gap: 0.6rem !important;
+        padding: 0.85rem 1rem !important;
+        transform: none !important;
+    }
+
+    .track-item:hover {
+        transform: none !important;
+    }
+
+    .track-left-group {
+        display: contents !important;
+    }
+
+    .track-num {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        justify-self: start !important;
+    }
+
+    .track-source-pill {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        justify-self: end !important;
+    }
+
+    .track-query {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        width: 100% !important;
+        font-size: 0.86rem !important;
+        line-height: 1.5 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
     }
 
     /* Companion Intelligence Grid - Single Column Stacking to Prevent Overflow */
@@ -7384,6 +7493,191 @@ body.sidebar-open .sidebar-boundary-tab,
 
     .clarifying-panel {
         padding: 1.25rem 1rem !important;
+    }
+
+    .clarifying-title {
+        font-size: 1.15rem !important;
+    }
+
+    .clarifying-body {
+        font-size: 0.88rem !important;
+        line-height: 1.55 !important;
+    }
+
+    /* --------------------------------------------------------------------------
+       RUNNING PIPELINE MODAL MOBILE OPTIMIZATIONS
+       -------------------------------------------------------------------------- */
+    #running-modal.modal-overlay {
+        padding: 0.65rem !important;
+    }
+
+    #running-modal .modal-card {
+        padding: 1.25rem 1rem 1.15rem 1rem !important;
+        border-radius: var(--radius-lg) !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    #running-modal .modal-console-header {
+        margin-bottom: 1rem !important;
+        padding-bottom: 0.75rem !important;
+        gap: 0.45rem !important;
+    }
+
+    #running-modal .modal-brand-tag {
+        gap: 0.45rem !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+
+    #running-modal .modal-brand-title {
+        font-size: 0.82rem !important;
+    }
+
+    #running-modal .modal-pipe-badge {
+        padding: 0.12rem 0.45rem !important;
+        font-size: 0.58rem !important;
+        margin-left: 0.2rem !important;
+        white-space: nowrap !important;
+    }
+
+    #running-modal .modal-timer-pill {
+        padding: 0.22rem 0.55rem !important;
+        gap: 0.35rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    #running-modal .timer-display {
+        font-size: 0.84rem !important;
+    }
+
+    #running-modal .modal-hero-section {
+        margin-bottom: 1.15rem !important;
+    }
+
+    #running-modal .modal-title {
+        font-size: 1.15rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    #running-modal .modal-topic-subtitle {
+        font-size: 0.8rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Stepper: Compact nodes & ensure connecting links/tracks stay visible */
+    #running-modal .modal-pipeline-stepper {
+        margin-bottom: 1.25rem !important;
+        padding: 0.3rem 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    #running-modal .stepper-step {
+        width: 44px !important;
+        max-width: 46px !important;
+        gap: 0.3rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    #running-modal .stepper-node {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.65rem !important;
+        border-width: 1.2px !important;
+    }
+
+    #running-modal .stepper-step.active .stepper-node {
+        transform: scale(1.12) !important;
+    }
+
+    #running-modal .stepper-label {
+        font-size: 0.56rem !important;
+        line-height: 1.15 !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        max-width: 44px !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    #running-modal .stepper-track {
+        flex: 1 1 10px !important;
+        min-width: 10px !important;
+        height: 2px !important;
+        margin: -0.95rem 0.2rem 0 0.2rem !important;
+        display: block !important;
+        position: relative !important;
+    }
+
+    @media (max-width: 380px) {
+        #running-modal .stepper-step {
+            width: 38px !important;
+            max-width: 38px !important;
+        }
+        #running-modal .stepper-node {
+            width: 24px !important;
+            height: 24px !important;
+            font-size: 0.6rem !important;
+        }
+        #running-modal .stepper-label {
+            font-size: 0.52rem !important;
+            max-width: 38px !important;
+        }
+        #running-modal .stepper-track {
+            min-width: 6px !important;
+            margin: -0.85rem 0.1rem 0 0.1rem !important;
+        }
+    }
+
+    /* Live Telemetry Console */
+    #running-modal .modal-telemetry-console {
+        padding: 0.85rem 0.95rem !important;
+        border-radius: 10px !important;
+    }
+
+    #running-modal .telemetry-objective-row {
+        margin-bottom: 0.5rem !important;
+    }
+
+    #running-modal .objective-lead {
+        font-size: 0.58rem !important;
+    }
+
+    #running-modal .stage-message {
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+    }
+
+    #running-modal .telemetry-sub-row {
+        gap: 0.4rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    #running-modal .telemetry-indicator-cluster {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        gap: 0.4rem !important;
+    }
+
+    #running-modal .telemetry-stream-text {
+        font-size: 0.64rem !important;
+        line-height: 1.3 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: normal !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+    }
+
+    #running-modal .telemetry-live-chip {
+        font-size: 0.58rem !important;
+        padding: 0.15rem 0.45rem !important;
+        flex-shrink: 0 !important;
     }
 
     /* --------------------------------------------------------------------------
@@ -7488,6 +7782,27 @@ body.sidebar-open .sidebar-boundary-tab,
     .markdown-body td {
         padding: 0.65rem 0.75rem !important;
         font-size: 0.82rem !important;
+    }
+
+    .markdown-body {
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+    }
+
+    .markdown-body code {
+        word-break: break-word !important;
+    }
+
+    .panel-foot-dot,
+    .modal-foot-dot {
+        flex-shrink: 0 !important;
+    }
+
+    .modal-footer-meta {
+        font-size: 0.7rem !important;
+        text-align: center !important;
+        justify-content: center !important;
+        line-height: 1.4 !important;
     }
 }
 

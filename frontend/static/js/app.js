@@ -1734,8 +1734,19 @@
             });
         }
 
-        // Topic input clear button handler & reactive run button state
+        // Topic input clear button handler, Enter key submission & reactive run button state
         if (dom.topicInput) {
+            dom.topicInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (dom.btnRunPipeline) {
+                        dom.btnRunPipeline.click();
+                    } else if (dom.researchForm) {
+                        dom.researchForm.requestSubmit();
+                    }
+                }
+            });
+
             dom.topicInput.addEventListener('input', () => {
                 const hasText = dom.topicInput.value.trim().length > 0;
                 if (dom.btnClearTopic) {

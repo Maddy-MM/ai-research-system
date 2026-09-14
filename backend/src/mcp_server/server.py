@@ -2,11 +2,16 @@ from mcp.server.fastmcp import FastMCP
 
 from src.config import get_settings
 from src.mcp_server.tools_impl import (
-    web_search_impl, scrape_url_impl, arxiv_search_impl, calculator_impl,
+    web_search_impl,
+    scrape_url_impl,
+    arxiv_search_impl,
+    calculator_impl,
 )
 
 settings = get_settings()
-mcp_server = FastMCP("researchmind-tools", host=settings.MCP_HOST, port=settings.MCP_PORT)
+mcp_server = FastMCP(
+    "researchmind-tools", host=settings.MCP_HOST, port=settings.MCP_PORT
+)
 
 
 @mcp_server.tool()

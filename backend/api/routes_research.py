@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from src.auth import TokenData, get_current_user
-from src.database import get_db
+from src.auth import get_current_user
+from src.database import User, get_db
 from src.models import ResearchReport
 from src.logging import get_logger
 from src.metrics import PIPELINE_REQUESTS_TOTAL
@@ -14,10 +14,6 @@ from src.pipeline.pipeline import run_research_pipeline
 router = APIRouter(prefix="/research", tags=["Research"])
 logger = get_logger(__name__)
 
-
-# ---------------------------------------------------------------------------
-# Schemas — define the shape of request and response bodies
-# ---------------------------------------------------------------------------
 
 class ResearchRequest(BaseModel):
     topic: str
@@ -36,22 +32,21 @@ class ResearchResponse(BaseModel):
     sub_questions: list[str] | None = None
 
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
 @router.post("/run", response_model=ResearchResponse)
 async def run_research(
     request: ResearchRequest,
-    current_user: TokenData = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # A unique ID per request — lets you grep logs for a full trace
     request_id = str(uuid.uuid4())
 
     logger.info(
         "Research request received",
-        extra={"topic": request.topic, "user": current_user.username, "request_id": request_id},
+        extra={
+            "topic": request.topic,
+            "user": current_user.username,
+            "request_id": request_id,
+        },
     )
 
     try:
@@ -83,10 +78,10 @@ async def run_research(
         sub_questions=state.get("sub_questions"),
     )
 
-    # Persist report to database
     try:
         db_report = ResearchReport(
             request_id=request_id,
+            user_id=current_user.id,
             username=current_user.username,
             topic=request.topic,
             report=response_data.report,
@@ -102,7 +97,10 @@ async def run_research(
         db.commit()
     except Exception as e:
         db.rollback()
-        logger.error("Failed to save report to database", extra={"error": str(e), "request_id": request_id})
+        logger.error(
+            "Failed to save report to database",
+            extra={"error": str(e), "request_id": request_id},
+        )
 
     return response_data
 
@@ -110,12 +108,15 @@ async def run_research(
 @router.get("/history", response_model=list[ResearchResponse])
 def get_history(
     limit: int = 20,
-    current_user: TokenData = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     reports = (
         db.query(ResearchReport)
-        .filter(ResearchReport.username == current_user.username)
+        .filter(
+            (ResearchReport.user_id == current_user.id)
+            | (ResearchReport.username == current_user.username)
+        )
         .order_by(ResearchReport.created_at.desc())
         .limit(limit)
         .all()
@@ -140,11 +141,14 @@ def get_history(
 
 @router.delete("/history")
 def clear_history(
-    current_user: TokenData = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     try:
-        db.query(ResearchReport).filter(ResearchReport.username == current_user.username).delete()
+        db.query(ResearchReport).filter(
+            (ResearchReport.user_id == current_user.id)
+            | (ResearchReport.username == current_user.username)
+        ).delete()
         db.commit()
         return {"status": "ok", "message": "History cleared"}
     except Exception as e:
@@ -158,14 +162,15 @@ def clear_history(
 @router.delete("/history/{request_id}")
 def delete_history_item(
     request_id: str,
-    current_user: TokenData = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     try:
         deleted_count = (
             db.query(ResearchReport)
             .filter(
-                ResearchReport.username == current_user.username,
+                (ResearchReport.user_id == current_user.id)
+                | (ResearchReport.username == current_user.username),
                 ResearchReport.request_id == request_id,
             )
             .delete()
@@ -185,4 +190,3 @@ def delete_history_item(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not delete report: {str(e)}",
         )
-

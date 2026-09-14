@@ -11,7 +11,6 @@ settings = get_settings()
 
 model_name = settings.OPENAI_MODEL.lower()
 
-# Standard LLM for structured output & synthesis (Planner, Writer, Critic)
 llm_kwargs = {
     "model": settings.OPENAI_MODEL,
     "temperature": 0,
@@ -26,9 +25,6 @@ if settings.OPENAI_REASONING_EFFORT:
 
 llm = ChatOpenAI(**llm_kwargs)
 
-# Dedicated LLM for tool-calling agents (Researcher, Verifier).
-# - Models like gpt-5.6-luna strictly require reasoning_effort="none" when function tools are attached.
-# - Models like gpt-5-nano reject reasoning_effort="none" (only supporting minimal/low/medium/high, or omitted).
 tool_llm_kwargs = {
     "model": settings.OPENAI_MODEL,
     "temperature": 0,
@@ -74,9 +70,15 @@ def build_verifier_agent(tools):
     )
 
 
-writer_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are an expert research writer. Write clear, structured and insightful reports."),
-    ("human", """Write a detailed research report on the topic below.
+writer_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are an expert research writer. Write clear, structured and insightful reports.",
+        ),
+        (
+            "human",
+            """Write a detailed research report on the topic below.
 
 Topic: {topic}
 
@@ -89,15 +91,19 @@ Structure the report as:
 - Conclusion
 - Sources (list all URLs found in the research)
 
-Be detailed, factual and professional."""),
-])
+Be detailed, factual and professional.""",
+        ),
+    ]
+)
 
 writer_chain = writer_prompt | llm
 
 
 class CriticVerdict(BaseModel):
     score: float = Field(description="Overall quality score from 0.0 to 1.0")
-    issue_type: Literal["missing_info", "unclear_writing", "unsupported_claims", "none"] = Field(
+    issue_type: Literal[
+        "missing_info", "unclear_writing", "unsupported_claims", "none"
+    ] = Field(
         description="The report's single biggest issue, or 'none' if it has no significant issue"
     )
     strengths: list[str] = Field(description="What the report does well")
@@ -105,9 +111,15 @@ class CriticVerdict(BaseModel):
     verdict: str = Field(description="One-line overall verdict")
 
 
-critic_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a sharp and constructive research critic. Be honest and specific."),
-    ("human", """Review the research report below and evaluate it strictly.
+critic_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are a sharp and constructive research critic. Be honest and specific.",
+        ),
+        (
+            "human",
+            """Review the research report below and evaluate it strictly.
 
 Report:
 {report}
@@ -115,39 +127,53 @@ Report:
 Score it from 0.0 to 1.0. Set issue_type to the ONE label that best describes the report's
 biggest weakness: 'missing_info' (gaps in coverage — needs more research), 'unclear_writing'
 (structure/clarity problems — needs a rewrite), 'unsupported_claims' (claims without grounding —
-needs a rewrite), or 'none' if there's no significant issue."""),
-])
+needs a rewrite), or 'none' if there's no significant issue.""",
+        ),
+    ]
+)
 
-critic_chain = critic_prompt | llm.with_structured_output(CriticVerdict, include_raw=True)
+critic_chain = critic_prompt | llm.with_structured_output(
+    CriticVerdict, include_raw=True
+)
 
 
 class PlannerOutput(BaseModel):
     sub_questions: list[str] = Field(
         description="Focused sub-questions that together cover the topic. "
-                     "Use exactly 1 for a simple factual query; 2-4 for a multi-faceted or comparison topic. "
-                     "Leave empty if clarifying_question is set instead."
+        "Use exactly 1 for a simple factual query; 2-4 for a multi-faceted or comparison topic. "
+        "Leave empty if clarifying_question is set instead."
     )
     clarifying_question: str = Field(
         default="",
         description="A question to ask the user before researching, ONLY if the topic is too "
-                     "ambiguous to research meaningfully as stated. Leave as empty string otherwise."
+        "ambiguous to research meaningfully as stated. Leave as empty string otherwise.",
     )
 
 
-planner_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a research planner. Break the user's topic into 2 to 3 sharply focused "
-               "sub-questions whose answers together make a complete report. Keep sub-questions concise "
-               "and targeted so they can be researched effectively."),
-    ("human", "Topic: {topic}\n\n{feedback_context}"),
-])
+planner_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are a research planner. Break the user's topic into 2 to 3 sharply focused "
+            "sub-questions whose answers together make a complete report. Keep sub-questions concise "
+            "and targeted so they can be researched effectively.",
+        ),
+        ("human", "Topic: {topic}\n\n{feedback_context}"),
+    ]
+)
 
-planner_chain = planner_prompt | llm.with_structured_output(PlannerOutput, include_raw=True)
+planner_chain = planner_prompt | llm.with_structured_output(
+    PlannerOutput, include_raw=True
+)
+
 
 class ClaimVerdict(BaseModel):
-    claim: str = Field(description="The factual claim from the report, quoted or closely paraphrased")
+    claim: str = Field(
+        description="The factual claim from the report, quoted or closely paraphrased"
+    )
     verdict: Literal["yes", "no", "partial"] = Field(
         description="'yes' if the research content fully supports this claim, 'no' if it's "
-                     "unsupported or fabricated, 'partial' if only loosely or partially supported"
+        "unsupported or fabricated, 'partial' if only loosely or partially supported"
     )
 
 
@@ -157,13 +183,23 @@ class VerificationOutput(BaseModel):
     )
 
 
-verifier_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a rigorous fact-checker. You will be given research content (the ground "
-               "truth this report is supposed to be grounded in) and a report written from it. "
-               "Identify every distinct factual claim in the report and verdict whether the research "
-               "content actually supports it. Be strict — a claim that sounds plausible but isn't "
-               "traceable to the research content is 'no', not 'yes'."),
-    ("human", "RESEARCH CONTENT (ground truth):\n{research}\n\nREPORT TO VERIFY:\n{report}"),
-])
+verifier_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are a rigorous fact-checker. You will be given research content (the ground "
+            "truth this report is supposed to be grounded in) and a report written from it. "
+            "Identify every distinct factual claim in the report and verdict whether the research "
+            "content actually supports it. Be strict — a claim that sounds plausible but isn't "
+            "traceable to the research content is 'no', not 'yes'.",
+        ),
+        (
+            "human",
+            "RESEARCH CONTENT (ground truth):\n{research}\n\nREPORT TO VERIFY:\n{report}",
+        ),
+    ]
+)
 
-verifier_chain = verifier_prompt | llm.with_structured_output(VerificationOutput, include_raw=True)
+verifier_chain = verifier_prompt | llm.with_structured_output(
+    VerificationOutput, include_raw=True
+)

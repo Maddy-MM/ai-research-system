@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 
 
 @pytest.mark.anyio
@@ -167,7 +167,6 @@ async def test_delete_individual_history_item(client, auth_headers, mock_pipelin
     assert res2.status_code == 200
 
     req_id1 = res1.json()["request_id"]
-    req_id2 = res2.json()["request_id"]
 
     # Delete only the first item
     del_res = await client.delete(f"/research/history/{req_id1}", headers=auth_headers)

@@ -2,7 +2,7 @@ import re
 
 
 def strip_thinking(text: str) -> str:
-    return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 
 def sum_tokens(messages) -> int:

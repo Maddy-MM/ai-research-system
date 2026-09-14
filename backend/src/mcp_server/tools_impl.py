@@ -44,7 +44,9 @@ def arxiv_search_impl(query: str) -> str:
     logger.info("Running arXiv search", extra={"query": query})
     try:
         client = arxiv.Client()
-        search = arxiv.Search(query=query, max_results=3, sort_by=arxiv.SortCriterion.Relevance)
+        search = arxiv.Search(
+            query=query, max_results=3, sort_by=arxiv.SortCriterion.Relevance
+        )
         output = [
             f"Title: {r.title}\nURL: {r.entry_id}\nSummary: {r.summary[:500]}"
             for r in client.results(search)
@@ -56,8 +58,14 @@ def arxiv_search_impl(query: str) -> str:
 
 
 _ALLOWED_OPS = {
-    ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul, ast.Div: op.truediv,
-    ast.Pow: op.pow, ast.USub: op.neg, ast.Mod: op.mod, ast.FloorDiv: op.floordiv,
+    ast.Add: op.add,
+    ast.Sub: op.sub,
+    ast.Mult: op.mul,
+    ast.Div: op.truediv,
+    ast.Pow: op.pow,
+    ast.USub: op.neg,
+    ast.Mod: op.mod,
+    ast.FloorDiv: op.floordiv,
 }
 
 
@@ -65,7 +73,9 @@ def _eval_node(node):
     if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
         return node.value
     if isinstance(node, ast.BinOp) and type(node.op) in _ALLOWED_OPS:
-        return _ALLOWED_OPS[type(node.op)](_eval_node(node.left), _eval_node(node.right))
+        return _ALLOWED_OPS[type(node.op)](
+            _eval_node(node.left), _eval_node(node.right)
+        )
     if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_OPS:
         return _ALLOWED_OPS[type(node.op)](_eval_node(node.operand))
     raise ValueError("Unsupported expression")
@@ -77,5 +87,7 @@ def calculator_impl(expression: str) -> str:
         tree = ast.parse(expression, mode="eval")
         return str(_eval_node(tree.body))
     except Exception as e:
-        logger.error("Calculator failed", extra={"expression": expression, "error": str(e)})
+        logger.error(
+            "Calculator failed", extra={"expression": expression, "error": str(e)}
+        )
         return f"Could not evaluate expression: {str(e)}"
