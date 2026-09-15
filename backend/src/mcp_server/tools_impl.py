@@ -1,6 +1,9 @@
 import ast
 import operator as op
 
+import concurrent.futures
+import re
+
 import arxiv
 import requests
 from bs4 import BeautifulSoup
@@ -40,21 +43,76 @@ def scrape_url_impl(url: str) -> str:
         return f"Could not scrape URL: {str(e)}"
 
 
+_STOP_WORDS = {
+    "how", "what", "which", "why", "when", "where", "who", "do", "does", "did",
+    "is", "are", "was", "were", "the", "a", "an", "and", "or", "of", "in", "on",
+    "for", "with", "to", "at", "by", "from", "including", "can", "affect",
+}
+
+
+def _clean_arxiv_query(query: str) -> str:
+    cleaned = re.sub(r"[^\w\s-]", " ", query)
+    words = cleaned.split()
+    meaningful = [w for w in words if w.lower() not in _STOP_WORDS]
+    keywords = meaningful[:5] if meaningful else words[:5]
+    return " ".join(keywords)
+
+
+class _TimeoutHTTPAdapter(requests.adapters.HTTPAdapter):
+    def __init__(self, *args, timeout=5.0, **kwargs):
+        self.timeout = timeout
+        super().__init__(*args, **kwargs)
+
+    def send(self, request, **kwargs):
+        if kwargs.get("timeout") is None:
+            kwargs["timeout"] = self.timeout
+        return super().send(request, **kwargs)
+
+
+def _fetch_arxiv(query_str: str) -> list[str]:
+    client = arxiv.Client(page_size=3, delay_seconds=1.0, num_retries=0)
+    adapter = _TimeoutHTTPAdapter(timeout=5.0)
+    client._session.mount("https://", adapter)
+    client._session.mount("http://", adapter)
+    search = arxiv.Search(
+        query=query_str, max_results=3, sort_by=arxiv.SortCriterion.Relevance
+    )
+    return [
+        f"Title: {r.title}\nURL: {r.entry_id}\nSummary: {r.summary[:500]}"
+        for r in client.results(search)
+    ]
+
+
 def arxiv_search_impl(query: str) -> str:
     logger.info("Running arXiv search", extra={"query": query})
+    clean_query = _clean_arxiv_query(query)
+
     try:
-        client = arxiv.Client()
-        search = arxiv.Search(
-            query=query, max_results=3, sort_by=arxiv.SortCriterion.Relevance
-        )
-        output = [
-            f"Title: {r.title}\nURL: {r.entry_id}\nSummary: {r.summary[:500]}"
-            for r in client.results(search)
-        ]
-        return "\n-----\n".join(output) if output else "No arXiv results found."
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(_fetch_arxiv, clean_query or query)
+            output = future.result(timeout=8.0)
+            if output:
+                return "\n-----\n".join(output)
+            logger.info(
+                "arXiv returned 0 results, falling back to academic web search",
+                extra={"query": query, "clean_query": clean_query},
+            )
     except Exception as e:
-        logger.error("arXiv search failed", extra={"query": query, "error": str(e)})
-        return f"Could not search arXiv: {str(e)}"
+        logger.warning(
+            "arXiv search failed or timed out, falling back to academic web search",
+            extra={"query": query, "clean_query": clean_query, "error": str(e)},
+        )
+
+    # Fallback to Tavily academic search
+    fallback_query = f"{clean_query or query} research paper arxiv"
+    try:
+        return web_search_impl(fallback_query)
+    except Exception as e:
+        logger.error(
+            "Academic fallback search failed",
+            extra={"query": fallback_query, "error": str(e)},
+        )
+        return "No academic research results found."
 
 
 _ALLOWED_OPS = {

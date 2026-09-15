@@ -28,7 +28,7 @@ def scrape_url(url: str) -> str:
 
 @mcp_server.tool()
 def arxiv_search(query: str) -> str:
-    """Search arXiv for academic papers on a technical/scientific topic. Prefer over web_search for research-paper-grade queries."""
+    """Search academic research papers (via arXiv or academic fallback) using 3-5 concise keywords (e.g. 'data center energy efficiency')."""
     return arxiv_search_impl(query)
 
 

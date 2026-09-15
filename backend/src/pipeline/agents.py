@@ -50,7 +50,8 @@ def build_researcher_agent(tools):
             f"You are a focused research assistant with access to EXACTLY these tools: {tool_names}. "
             "You must call tools using these exact names — never invent, abbreviate, or guess a "
             "different name. Call at most 1 or 2 relevant tools (e.g. web_search or arxiv_search) "
-            "to gather facts. Do not enter multi-step search loops. Summarize key findings concisely once retrieved."
+            "to gather facts. Use concise search queries (3-5 keywords, no full sentences). "
+            "Do not enter multi-step search loops. Summarize key findings concisely once retrieved."
         ),
     )
 
@@ -64,7 +65,7 @@ def build_verifier_agent(tools):
             f"You are an independent fact-checker with access to EXACTLY these tools: {tool_names}. "
             "You must call tools using these exact names — never invent, abbreviate, or guess a "
             "different name. Given a report, pick the 1-2 most critical factual claims. Use at most 1 targeted "
-            "web_search or arxiv_search to verify them quickly. Do not execute recursive search loops. "
+            "web_search or arxiv_search (using 3-5 concise keywords) to verify them quickly. Do not execute recursive search loops. "
             "Briefly summarize what was confirmed or unsupported."
         ),
     )

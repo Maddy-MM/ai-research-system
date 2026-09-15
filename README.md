@@ -57,6 +57,7 @@ The system uses **LangGraph** to orchestrate planning, parallel research, writin
 - Dynamic planning — sub-question count scales with topic complexity; can ask a clarifying question instead of researching an ambiguous topic
 - Parallel research via LangGraph's `Send` API — sub-questions investigated concurrently, not sequentially
 - MCP tool server exposing `web_search`, `scrape_url`, `arxiv_search`, and `calculator` — shared by both the researcher agent (per sub-question) and the verifier agent, each selecting tools independently
+- Resilient academic paper discovery — arXiv queries are keyword-sanitized, bounded with strict 5-second socket and executor timeouts, and automatically fail over to Tavily academic search on rate-limits (HTTP 429/503), preventing pipeline hangs on cloud deployments
 - Iterative critic loop — structured verdict (score + issue type) routes back to the planner (missing info) or the writer (unclear/unsupported), bounded by an iteration cap and a token budget
 - Independent citation verification — a tool-using verifier agent re-checks the report's most load-bearing claims against fresh sources (not just the original research), then a structured chain gives a yes/no/partial verdict per claim
 - Optional LangSmith tracing for full pipeline observability during development
@@ -101,6 +102,7 @@ START → planner ──┴─→ [Send fan-out] → researcher (parallel) → w
 - One LangGraph node instance per sub-question, dispatched concurrently via `Send`
 - Each instance is an MCP *client* — connects to the tool server and picks whichever tool(s) fit the sub-question
 - Results accumulate into shared graph state via a list-append reducer
+- Built-in tool resilience: keyword sanitization, 5-second socket timeouts, and automatic academic web search fallback prevent parallel branches from blocking or failing on external API rate-limits
 
 ### Writer
 - Combines all parallel research results into one structured report (Introduction, Key Findings, Conclusion, Sources)
@@ -123,7 +125,7 @@ A standalone process (`src/mcp_server/server.py`) exposing four tools over MCP:
 
 - `web_search` — Tavily-backed web search
 - `scrape_url` — BeautifulSoup-based page scraping
-- `arxiv_search` — academic paper search via the arXiv API
+- `arxiv_search` — resilient academic paper search via the arXiv API with keyword sanitization, 5-second socket timeout, and automatic fallback to Tavily academic paper search on rate-limits (HTTP 429/503) or timeouts
 - `calculator` — safe arithmetic evaluation (no `eval`/`exec`)
 
 Two nodes connect as MCP clients (`langchain-mcp-adapters`), each an independent tool-calling agent: the **researcher** picks tool(s) per sub-question, and the **verifier** independently picks tool(s) to spot-check the report's claims — neither follows a fixed search→scrape sequence.
@@ -385,7 +387,7 @@ The test suite includes **18 unit and integration tests** executed with `pytest`
 
 ## Current Limitations & Tradeoffs
 
-- **No production hardening yet** — no wall-clock timeout per run, no graceful degradation if one parallel research branch fails; deferred as a future pass
+- **No global wall-clock pipeline timeout** — individual research tools are hardened with strict timeouts and automatic fallbacks, but the overall multi-step LangGraph execution does not yet enforce an end-to-end wall-clock cancellation ceiling
 - **Eval harness not yet built** — `CRITIC_THRESHOLD` is a placeholder until it exists and has been run
 - **Frontend has no streaming** — results render only after the full graph completes
 - **Verification is costlier and slower** — the verifier's independent tool-calling pass adds a full agentic round trip to every run
