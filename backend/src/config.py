@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: str
     OPENAI_API_KEY: str = ""
 
-    MCP_SERVER_URL: str = "http://localhost:8001/mcp"
-    MCP_HOST: str = "0.0.0.0"
+    MCP_SERVER_URL: str = "http://127.0.0.1:8001/mcp"
+    MCP_HOST: str = "127.0.0.1"
     MCP_PORT: int = 8001
 
     LANGCHAIN_TRACING_V2: bool = False

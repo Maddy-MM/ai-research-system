@@ -20,6 +20,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
-EXPOSE 8001
 
 CMD ["/bin/sh", "entrypoint.sh"]

@@ -298,8 +298,8 @@ DEMO_PASSWORD=secret                           # or DEFAULT_PASS
 DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 
 # FastMCP tool server configuration
-MCP_SERVER_URL=http://localhost:8001/mcp
-MCP_HOST=0.0.0.0
+MCP_SERVER_URL=http://127.0.0.1:8001/mcp
+MCP_HOST=127.0.0.1
 MCP_PORT=8001
 
 # Optional — LangSmith tracing
