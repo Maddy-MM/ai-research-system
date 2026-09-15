@@ -364,6 +364,7 @@ The test suite includes **18 unit and integration tests** executed with `pytest`
 - **Database & Auth:** Bcrypt password hashing/validation, database `User` lookups, JWT issuance, JSON login (`/login`), OAuth2 form login (`/auth/token`), and missing/invalid field validation (HTTP 422).
 - **Security Guards:** Bearer token authentication, malformed/missing headers, invalid/expired token rejection (HTTP 401).
 - **Research Pipeline & Persistence:** Mocked LangGraph pipeline runs (`/research/run`), topic validation, clarifying question handling, and user-scoped report history retrieval/deletion (`/research/history`).
+- **Database Isolation:** Test fixtures automatically bind to an isolated local SQLite database (`test.db`), guaranteeing tests never touch production databases.
 
 ---
 
@@ -371,7 +372,7 @@ The test suite includes **18 unit and integration tests** executed with `pytest`
 
 - **Unified Web & Pipeline Container:** Built via a multi-stage `Dockerfile` and hosted on Render.
 - **Entrypoint Process Orchestration:** [`backend/entrypoint.sh`](backend/entrypoint.sh) boots the FastMCP tool server in the background on port `8001`, then launches the FastAPI application on `${PORT:-8000}`.
-- **Internal Tool Communication:** FastAPI nodes communicate with the FastMCP server over `http://localhost:8001/mcp` within the container's isolated local network.
+- **Internal Tool Communication:** FastAPI nodes communicate with the FastMCP server over `http://127.0.0.1:8001/mcp` within the container's isolated local loopback interface.
 - **Frontend Serving:** FastAPI serves the Jinja2 single-page application at `/` and static assets from `/static`, requiring no separate frontend hosting service.
 - **Custom Domain Ready:** Pre-configured for apex or subdomain deployment (e.g. `madhavmakwana.dev` or `research.madhavmakwana.dev`) with automated SSL certificates.
 
