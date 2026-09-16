@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23FF7E29'/%3E%3Cpath d='M16 5.5L28 11.5L16 17.5L4 11.5Z' fill='%23FFFFFF'/%3E%3Cpath d='M7.5 14v4.5C7.5 21.8 11.2 24.5 16 24.5s8.5-2.7 8.5-6V14' fill='none' stroke='%23FFFFFF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M28 11.5v6.5' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='28' cy='19.5' r='1.4' fill='%23FFFFFF'/%3E%3Cpolygon points='16,8.8 18.2,11.5 16,14.2 13.8,11.5' fill='%23FF7E29'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260911_56">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260916_14">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body class="bg-dark text-light">
@@ -299,6 +299,9 @@
                     </button>
                 </div>
             </aside>
+            
+            <!-- Ambient Cosmic Sidebar Backdrop (Premium Faded Glass Blur & Vignette) -->
+            <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
 
             <!-- Sleek Floating Obsidian Dock Toggle (Multipurpose: Open & Matching Close) -->
             <button type="button" id="btn-prominent-open-sidebar" class="sidebar-floating-toggle sidebar-boundary-tab" title="Expand Workspace (Ctrl+\)" aria-label="Expand Workspace">
@@ -714,9 +717,9 @@
                                 </div>
                             </div>
                             <div class="results-actions">
-                                <div class="telemetry-pill highlight" title="All 5 Agents Completed Synthesis">
+                                <div class="telemetry-pill highlight" id="results-telemetry-status" title="All 5 Agents Completed Synthesis">
                                     <span class="status-pulse-dot"></span>
-                                    <span>Synthesis Complete</span>
+                                    <span id="results-synthesis-status-text">Synthesis Complete</span>
                                 </div>
                                 <div class="telemetry-pill engine-telemetry hide-on-mobile" title="LangGraph Multi-Agent Architecture v0.2">
                                     <span class="engine-dot"></span>
@@ -743,11 +746,46 @@
 
                     <div class="stage-container results-container">
                         <!-- Ambiguity / Clarifying Question Banner (Conditional) -->
-                        <div id="clarifying-container" class="clarifying-panel glass-panel hidden">
-                            <div class="panel-tag orange">Topic Ambiguous</div>
-                            <h3 class="clarifying-title">Clarification Required</h3>
-                            <p id="clarifying-question-text" class="clarifying-body"></p>
-                            <button id="btn-clarify-try-again" class="btn btn-primary btn-sm">Try Another Topic</button>
+                        <div id="clarifying-container" class="clarifying-panel glass-panel hidden" role="region" aria-label="Topic Clarification Required">
+                            <div class="clarifying-top-accent"></div>
+                            <div class="clarifying-header">
+                                <div class="clarifying-badge-box">
+                                    <span class="panel-tag orange">Topic Ambiguous</span>
+                                    <span class="clarifying-subtag"><span class="pipe-dot orange"></span> Scope Calibration</span>
+                                </div>
+                                <h3 class="clarifying-title">Clarification Required</h3>
+                            </div>
+                            <div class="clarifying-guidance-box">
+                                <div class="clarifying-icon-box">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
+                                </div>
+                                <p id="clarifying-question-text" class="clarifying-body"></p>
+                            </div>
+                            <div class="clarifying-input-container">
+                                <div class="clarifying-input-wrapper">
+                                    <div class="clarifying-input-icon">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="clarify-inline-topic-input" class="clarifying-input" placeholder="Refine your research inquiry..." autocomplete="off">
+                                </div>
+                                <div class="clarifying-actions">
+                                    <button type="button" id="btn-clarify-try-again" class="btn btn-secondary btn-sm" title="Return to Search Stage">Back to Search</button>
+                                    <button type="button" id="btn-clarify-inline-submit" class="btn btn-primary btn-sm" title="Execute Pipeline with Refined Topic">
+                                        <span>Refine &amp; Run Pipeline</span>
+                                        <svg class="btn-arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            <polyline points="12 5 19 12 12 19"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Main Results Content -->
@@ -819,6 +857,10 @@
                                         <span class="meta-chip chip-reading" id="report-reading-time">
                                             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                             <span>~1,200 Words · 5 Min Read</span>
+                                        </span>
+                                        <span class="meta-chip chip-duration" id="report-pipeline-time">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                                            <span id="report-pipeline-time-text">20s Pipeline Time</span>
                                         </span>
                                     </div>
                                 </div>
@@ -1095,86 +1137,166 @@
                 <!-- Subtle Solar Accent Top Edge -->
                 <div class="modal-top-accent"></div>
 
-                <!-- Unified Header Bar: Brand + Live Status + Monospace Timer -->
-                <div class="modal-console-header">
-                    <div class="modal-brand-tag">
-                        <div class="modal-brand-icon">
-                            <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
-                                <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
-                                <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
-                                <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
-                            </svg>
+                <!-- VIEW 1: RUNNING PIPELINE PROGRESS -->
+                <div id="running-view-progress" class="modal-card-view">
+                    <!-- Unified Header Bar: Brand + Live Status + Monospace Timer -->
+                    <div class="modal-console-header">
+                        <div class="modal-brand-tag">
+                            <div class="modal-brand-icon">
+                                <svg class="rm-brand-logo" viewBox="-0.25 -0.6 25.2 25.2" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3.2L22.5 8.2L12 13.2L1.5 8.2Z" fill="#FFFFFF"/>
+                                    <path d="M5.5 10.5V14.2C5.5 17.5 8.4 19.8 12 19.8C15.6 19.8 18.5 17.5 18.5 14.2V10.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M22.5 8.2V14.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+                                    <circle cx="22.5" cy="15.8" r="1.3" fill="#FFFFFF"/>
+                                    <polygon points="12,5.8 14.2,8.2 12,10.6 9.8,8.2" fill="#E65A00"/>
+                                </svg>
+                            </div>
+                            <span class="modal-brand-title">ResearchMind</span>
+                            <span class="modal-pipe-badge"><span class="pipe-dot"></span> Active Pipeline</span>
                         </div>
-                        <span class="modal-brand-title">ResearchMind</span>
-                        <span class="modal-pipe-badge"><span class="pipe-dot"></span> Active Pipeline</span>
+                        <div class="modal-timer-pill">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--brand-orange)" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 15 15"></polyline>
+                            </svg>
+                            <span class="timer-display" id="live-timer">00:00</span>
+                        </div>
                     </div>
-                    <div class="modal-timer-pill">
-                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--brand-orange)" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 15 15"></polyline>
+
+                    <!-- Topic & Autonomous Mission Headline -->
+                    <div class="modal-hero-section">
+                        <h3 class="modal-title">Investigating Research Topic</h3>
+                        <p class="modal-topic-subtitle">
+                            Deep multi-agent inquiry into <span id="running-topic-display" class="modal-topic-highlight">"demo"</span>
+                        </p>
+                    </div>
+
+                    <!-- 5-Stage Visual Telemetry Stepper (Clean & Open) -->
+                    <div class="modal-pipeline-stepper" id="modal-pipeline-stepper">
+                        <div class="stepper-step active" data-step="0">
+                            <div class="stepper-node"><span class="stepper-num">01</span></div>
+                            <span class="stepper-label">Planner</span>
+                        </div>
+                        <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                        <div class="stepper-step" data-step="1">
+                            <div class="stepper-node"><span class="stepper-num">02</span></div>
+                            <span class="stepper-label">MCP Tools</span>
+                        </div>
+                        <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                        <div class="stepper-step" data-step="2">
+                            <div class="stepper-node"><span class="stepper-num">03</span></div>
+                            <span class="stepper-label">Synthesizer</span>
+                        </div>
+                        <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                        <div class="stepper-step" data-step="3">
+                            <div class="stepper-node"><span class="stepper-num">04</span></div>
+                            <span class="stepper-label">Critic</span>
+                        </div>
+                        <div class="stepper-track"><div class="stepper-track-fill"></div></div>
+                        <div class="stepper-step" data-step="4">
+                            <div class="stepper-node"><span class="stepper-num">05</span></div>
+                            <span class="stepper-label">Verifier</span>
+                        </div>
+                    </div>
+
+                    <!-- Single Unified Live Telemetry Console -->
+                    <div class="modal-telemetry-console">
+                        <div class="telemetry-objective-row">
+                            <span class="objective-lead">Active Phase</span>
+                            <div class="stage-message" id="running-status-message">Planning focused research questions...</div>
+                        </div>
+                        <div class="telemetry-sub-row">
+                            <div class="telemetry-indicator-cluster">
+                                <svg class="spin-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--brand-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                <span class="telemetry-stream-text">Parallel MCP sub-agents querying Tavily, arXiv &amp; consensus bus</span>
+                            </div>
+                            <div class="telemetry-live-chip">
+                                <span class="pulse-chip-dot"></span> LIVE BUS
+                            </div>
+                        </div>
+                        <!-- Ambient scanline trace at bottom -->
+                        <div class="telemetry-scan-bar"><div class="telemetry-scan-pulse"></div></div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: TOPIC CLARIFICATION IN-PLACE (ZERO FLICKER) -->
+                <div id="running-view-clarify" class="modal-card-view hidden">
+                    <!-- Top-Right Dedicated Circular Close Button -->
+                    <button type="button" id="btn-close-clarify-modal" class="btn-modal-close-circle" title="Close clarification (Esc)" aria-label="Close clarification">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                        <span class="timer-display" id="live-timer">00:00</span>
-                    </div>
-                </div>
+                    </button>
 
-                <!-- Topic & Autonomous Mission Headline -->
-                <div class="modal-hero-section">
-                    <h3 class="modal-title">Investigating Research Topic</h3>
-                    <p class="modal-topic-subtitle">
-                        Deep multi-agent inquiry into <span id="running-topic-display" class="modal-topic-highlight">"demo"</span>
-                    </p>
-                </div>
+                    <!-- Modal Console Header Bar -->
+                    <div class="modal-console-header clarify-modal-header">
+                        <div class="modal-brand-tag">
+                            <div class="clarify-brand-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                            </div>
+                            <span class="modal-brand-title">Topic Ambiguous</span>
+                            <span class="modal-pipe-badge orange"><span class="pipe-dot orange"></span> Scope Calibration</span>
+                        </div>
+                    </div>
 
-                <!-- 5-Stage Visual Telemetry Stepper (Clean & Open) -->
-                <div class="modal-pipeline-stepper" id="modal-pipeline-stepper">
-                    <div class="stepper-step active" data-step="0">
-                        <div class="stepper-node"><span class="stepper-num">01</span></div>
-                        <span class="stepper-label">Planner</span>
+                    <!-- Modal Hero Section -->
+                    <div class="clarify-modal-hero">
+                        <h3 id="clarify-modal-title" class="clarify-modal-title">Clarification Required</h3>
+                        <p class="clarify-modal-subtitle">The multi-agent planner needs a more specific scope to deliver a rigorous research dossier.</p>
                     </div>
-                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
-                    <div class="stepper-step" data-step="1">
-                        <div class="stepper-node"><span class="stepper-num">02</span></div>
-                        <span class="stepper-label">MCP Tools</span>
-                    </div>
-                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
-                    <div class="stepper-step" data-step="2">
-                        <div class="stepper-node"><span class="stepper-num">03</span></div>
-                        <span class="stepper-label">Synthesizer</span>
-                    </div>
-                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
-                    <div class="stepper-step" data-step="3">
-                        <div class="stepper-node"><span class="stepper-num">04</span></div>
-                        <span class="stepper-label">Critic</span>
-                    </div>
-                    <div class="stepper-track"><div class="stepper-track-fill"></div></div>
-                    <div class="stepper-step" data-step="4">
-                        <div class="stepper-node"><span class="stepper-num">05</span></div>
-                        <span class="stepper-label">Verifier</span>
-                    </div>
-                </div>
 
-                <!-- Single Unified Live Telemetry Console -->
-                <div class="modal-telemetry-console">
-                    <div class="telemetry-objective-row">
-                        <span class="objective-lead">Active Phase</span>
-                        <div class="stage-message" id="running-status-message">Planning focused research questions...</div>
-                    </div>
-                    <div class="telemetry-sub-row">
-                        <div class="telemetry-indicator-cluster">
-                            <svg class="spin-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--brand-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    <!-- Clarifying Guidance Callout Box -->
+                    <div class="clarify-modal-guidance glass-panel">
+                        <div class="clarify-guidance-badge">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
                             </svg>
-                            <span class="telemetry-stream-text">Parallel MCP sub-agents querying Tavily, arXiv & consensus bus</span>
+                            <span>Planner Feedback</span>
                         </div>
-                        <div class="telemetry-live-chip">
-                            <span class="pulse-chip-dot"></span> LIVE BUS
-                        </div>
+                        <p id="modal-clarifying-question-text" class="clarify-modal-question-body"></p>
                     </div>
-                    <!-- Ambient scanline trace at bottom -->
-                    <div class="telemetry-scan-bar"><div class="telemetry-scan-pulse"></div></div>
+
+                    <!-- Clarification Refinement Form -->
+                    <form id="clarify-modal-form" class="clarify-modal-form" novalidate>
+                        <label for="modal-clarify-topic-input" class="clarify-input-label">Refine Inquiry Scope</label>
+                        <div class="clarify-modal-input-wrapper">
+                            <div class="search-icon-box">
+                                <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                            <input type="text" id="modal-clarify-topic-input" class="search-input clarify-modal-input" placeholder="Refine your research inquiry or angle..." autocomplete="off">
+                            <button type="button" id="btn-clear-clarify-modal-topic" class="btn-clear-input hidden" title="Clear input">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Actions Footer -->
+                        <div class="clarify-modal-footer">
+                            <button type="button" id="btn-clarify-modal-cancel" class="btn btn-secondary btn-sm">Cancel</button>
+                            <button type="submit" id="btn-clarify-modal-submit" class="btn btn-primary btn-sm">
+                                <span>Refine &amp; Run Pipeline</span>
+                                <svg class="btn-arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -1260,6 +1382,6 @@
     </div>
 
     <!-- Application Script -->
-    <script src="/static/js/app.js?v=20260911_56"></script>
+    <script src="/static/js/app.js?v=20260916_14"></script>
 </body>
 </html>

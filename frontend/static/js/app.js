@@ -1342,6 +1342,7 @@
 
         // Sidebar
         sidebar: document.getElementById('app-sidebar'),
+        sidebarBackdrop: document.getElementById('sidebar-backdrop'),
         btnProminentOpenSidebar: document.getElementById('btn-prominent-open-sidebar'),
         btnCollapseSidebar: document.getElementById('btn-prominent-open-sidebar'),
         btnCollapseSidebarRail: document.getElementById('btn-collapse-sidebar-rail'),
@@ -1364,6 +1365,8 @@
 
         // Running Modal
         runningModal: document.getElementById('running-modal'),
+        runningViewProgress: document.getElementById('running-view-progress'),
+        runningViewClarify: document.getElementById('running-view-clarify'),
         runningTopicDisplay: document.getElementById('running-topic-display'),
         liveTimer: document.getElementById('live-timer'),
         runningStatusMessage: document.getElementById('running-status-message'),
@@ -1371,9 +1374,24 @@
         // Results Stage
         btnBackToSearch: document.getElementById('btn-back-to-search'),
         btnPrintReport: document.getElementById('btn-print-report'),
+        resultsSynthesisStatusText: document.getElementById('results-synthesis-status-text'),
+        reportPipelineTime: document.getElementById('report-pipeline-time'),
+        reportPipelineTimeText: document.getElementById('report-pipeline-time-text'),
         clarifyingContainer: document.getElementById('clarifying-container'),
         clarifyingQuestionText: document.getElementById('clarifying-question-text'),
         btnClarifyTryAgain: document.getElementById('btn-clarify-try-again'),
+        clarifyInlineTopicInput: document.getElementById('clarify-inline-topic-input'),
+        btnClarifyInlineSubmit: document.getElementById('btn-clarify-inline-submit'),
+
+        // Topic Clarification Elements (In-Card View)
+        btnCloseClarifyModal: document.getElementById('btn-close-clarify-modal'),
+        btnClarifyModalCancel: document.getElementById('btn-clarify-modal-cancel'),
+        btnClarifyModalSubmit: document.getElementById('btn-clarify-modal-submit'),
+        modalClarifyForm: document.getElementById('clarify-modal-form'),
+        modalClarifyTopicInput: document.getElementById('modal-clarify-topic-input'),
+        btnClearClarifyModalTopic: document.getElementById('btn-clear-clarify-modal-topic'),
+        modalClarifyingQuestionText: document.getElementById('modal-clarifying-question-text'),
+
         reportPayloadContainer: document.getElementById('report-payload-container'),
         resultsTopicTitle: document.getElementById('results-topic-title'),
         metricScore: document.getElementById('metric-score'),
@@ -1443,6 +1461,7 @@
                 ],
                 tokens_used: 14820,
                 iteration_count: 1,
+                execution_time_seconds: 20,
                 request_id: 'req_sim_demo'
             };
             state.currentResults = mockData;
@@ -1678,6 +1697,12 @@
                 toggleSidebar();
             });
         }
+        if (dom.sidebarBackdrop) {
+            dom.sidebarBackdrop.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSidebar(true);
+            });
+        }
         if (dom.btnSidebarNewSearch) {
             dom.btnSidebarNewSearch.addEventListener('click', () => {
                 if (window.innerWidth <= 768) {
@@ -1708,9 +1733,9 @@
             });
         }
 
-        // Close sidebar on compact screens when clicking outside the drawer
+        // Close overlay sidebar when clicking outside the drawer
         document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && document.body.classList.contains('sidebar-open')) {
+            if (document.body.classList.contains('sidebar-open')) {
                 if (dom.sidebar && !dom.sidebar.contains(e.target) && !e.target.closest('.btn-mobile-menu') && !e.target.closest('.btn-sidebar-toggle-top') && !e.target.closest('.btn-topbar-toggle') && !e.target.closest('#sidebar-bookmark-toggle') && !e.target.closest('#btn-prominent-open-sidebar')) {
                     toggleSidebar(true);
                 }
@@ -1808,6 +1833,25 @@
 
         // Results Actions
         dom.btnBackToSearch.addEventListener('click', showSearchStage);
+        if (dom.btnClarifyTryAgain) {
+            dom.btnClarifyTryAgain.addEventListener('click', () => {
+                showSearchStage(true);
+                if (dom.topicInput) {
+                    dom.topicInput.select();
+                }
+            });
+        }
+        if (dom.btnClarifyInlineSubmit) {
+            dom.btnClarifyInlineSubmit.addEventListener('click', handleClarifyInlineSubmit);
+        }
+        if (dom.clarifyInlineTopicInput) {
+            dom.clarifyInlineTopicInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleClarifyInlineSubmit();
+                }
+            });
+        }
         const btnBrandHome = document.getElementById('btn-brand-home');
         if (btnBrandHome) {
             btnBrandHome.addEventListener('click', () => showSearchStage());
@@ -1824,6 +1868,33 @@
                     e.preventDefault();
                     toggleSubquestions();
                 }
+            });
+        }
+
+        // Clarification Modal Handlers
+        if (dom.btnCloseClarifyModal) {
+            dom.btnCloseClarifyModal.addEventListener('click', closeClarifyModal);
+        }
+        if (dom.btnClarifyModalCancel) {
+            dom.btnClarifyModalCancel.addEventListener('click', closeClarifyModal);
+        }
+        if (dom.modalClarifyForm) {
+            dom.modalClarifyForm.addEventListener('submit', handleClarifyModalSubmit);
+        }
+        if (dom.modalClarifyTopicInput) {
+            dom.modalClarifyTopicInput.addEventListener('input', () => {
+                if (dom.btnClearClarifyModalTopic) {
+                    dom.btnClearClarifyModalTopic.classList.toggle('hidden', !dom.modalClarifyTopicInput.value);
+                }
+            });
+        }
+        if (dom.btnClearClarifyModalTopic) {
+            dom.btnClearClarifyModalTopic.addEventListener('click', () => {
+                if (dom.modalClarifyTopicInput) {
+                    dom.modalClarifyTopicInput.value = '';
+                    dom.modalClarifyTopicInput.focus();
+                }
+                dom.btnClearClarifyModalTopic.classList.add('hidden');
             });
         }
 
@@ -1859,8 +1930,12 @@
             });
         }
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && dom.modalReportViewer && !dom.modalReportViewer.classList.contains('hidden')) {
-                closeReportModal();
+            if (e.key === 'Escape') {
+                if (dom.modalClarifyDialog && !dom.modalClarifyDialog.classList.contains('hidden')) {
+                    closeClarifyModal();
+                } else if (dom.modalReportViewer && !dom.modalReportViewer.classList.contains('hidden')) {
+                    closeReportModal();
+                }
             }
         });
 
@@ -2069,21 +2144,37 @@
             ],
             tokens_used: meta.tokens_used || 14820,
             iteration_count: meta.iteration_count || 1,
+            execution_time_seconds: state.startTime ? Math.max(1, Math.round((Date.now() - state.startTime) / 1000)) : 20,
             request_id: 'req_sim_' + Math.random().toString(36).substring(2, 8)
         };
 
         state.currentResults = mockData;
-        saveToHistory(mockData.topic, mockData);
-        stopRunningState();
         renderResults(mockData);
         showResultsStage();
+        requestAnimationFrame(() => {
+            stopRunningState(true);
+        });
     }
 
-    async function handleRunPipeline(e) {
-        e.preventDefault();
-        const topic = dom.topicInput.value.trim();
+    async function executeResearch(rawTopic) {
+        const topic = (rawTopic || '').trim();
         if (!topic) {
             triggerEmptyTopicGuard();
+            return;
+        }
+
+        // Check for mock keyword with ambiguous test flag "- A" (case-insensitive, e.g. "Test - A", "dEmO - a", "demo-a", "default - a")
+        const mockAmbiguousMatch = topic.match(/^(default|demo|test)\s*-\s*a$/i);
+        if (mockAmbiguousMatch) {
+            const baseWord = mockAmbiguousMatch[1].charAt(0).toUpperCase() + mockAmbiguousMatch[1].slice(1).toLowerCase();
+            const simulatedQuestion = `What specific dimension of ${baseWord} research should the multi-agent system investigate? For example: core theoretical foundations & mathematical formalisms, experimental benchmark metrics, real-world deployment challenges, or adversarial robustness & security models.`;
+            
+            // Brief 2.5s simulation: show running HUD with active neural canvas & stepper
+            startRunningState(topic, 2500);
+            await new Promise(resolve => setTimeout(resolve, 2500));
+
+            // Morph modal card in-place to clarify view — zero modal hide/show, zero screen flicker!
+            openClarifyModal(baseWord, simulatedQuestion);
             return;
         }
 
@@ -2118,17 +2209,93 @@
                 throw new Error(data.detail || 'Pipeline execution failed.');
             }
 
+            // If the planner identified topic ambiguity, morph the modal in-place to the clarification view
+            if (data.clarifying_question) {
+                state.currentResults = data;
+                renderResults(data);
+                openClarifyModal(topic, data.clarifying_question);
+                return;
+            }
+
+            // Record pipeline execution elapsed time
+            data.execution_time_seconds = data.execution_time_seconds || (state.startTime ? Math.max(1, Math.round((Date.now() - state.startTime) / 1000)) : 20);
+
             // Save to state and history
             state.currentResults = data;
             saveToHistory(topic, data);
-            stopRunningState();
             renderResults(data);
             showResultsStage();
+            requestAnimationFrame(() => {
+                stopRunningState(true);
+            });
         } catch (err) {
-            stopRunningState();
+            stopRunningState(false);
             showToast(`Error: ${err.message}`);
             alert(`Research pipeline error: ${err.message}`);
         }
+    }
+
+    async function handleRunPipeline(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const topic = dom.topicInput ? dom.topicInput.value.trim() : '';
+        await executeResearch(topic);
+    }
+
+    async function handleClarifyModalSubmit(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const refinedTopic = dom.modalClarifyTopicInput ? dom.modalClarifyTopicInput.value.trim() : '';
+        if (!refinedTopic) {
+            if (dom.modalClarifyTopicInput) dom.modalClarifyTopicInput.focus();
+            return;
+        }
+
+        // Update search input in background
+        if (dom.topicInput) {
+            dom.topicInput.value = refinedTopic;
+            if (dom.btnClearTopic) {
+                dom.btnClearTopic.classList.remove('hidden');
+            }
+        }
+
+        // Check if refined topic is mock keyword or mock ambiguous
+        const isMockAmbiguous = refinedTopic.match(/^(default|demo|test)\s*-\s*a$/i);
+        const MOCK_KEYWORDS = ['default', 'demo', 'test'];
+        const isMockKeyword = MOCK_KEYWORDS.includes(refinedTopic.toLowerCase());
+
+        // Instantly flip view back to progress in-place inside the SAME modal
+        if (dom.runningViewClarify) {
+            dom.runningViewClarify.classList.add('hidden');
+        }
+        if (dom.runningViewProgress) {
+            dom.runningViewProgress.classList.remove('hidden');
+        }
+
+        // Start running state inside the already open modal
+        startRunningState(refinedTopic, isMockKeyword ? 4000 : (isMockAmbiguous ? 2500 : 14000));
+
+        // Delegate to appropriate research handler
+        if (isMockAmbiguous) {
+            await executeResearch(refinedTopic);
+        } else if (isMockKeyword) {
+            await handleMockPipeline(refinedTopic);
+        } else {
+            await executeResearch(refinedTopic);
+        }
+    }
+
+    async function handleClarifyInlineSubmit() {
+        const refinedTopic = dom.clarifyInlineTopicInput ? dom.clarifyInlineTopicInput.value.trim() : '';
+        if (!refinedTopic) {
+            if (dom.clarifyInlineTopicInput) dom.clarifyInlineTopicInput.focus();
+            return;
+        }
+        if (dom.topicInput) {
+            dom.topicInput.value = refinedTopic;
+            if (dom.btnClearTopic) {
+                dom.btnClearTopic.classList.remove('hidden');
+            }
+        }
+        await executeResearch(refinedTopic);
     }
 
     function updateModalStepper(stepIndex) {
@@ -2160,10 +2327,25 @@
         });
     }
 
+    let fadeOutTimeout = null;
+
     function startRunningState(topic, statusIntervalMs = 14000) {
+        if (fadeOutTimeout) {
+            clearTimeout(fadeOutTimeout);
+            fadeOutTimeout = null;
+        }
         state.running = true;
+        if (dom.runningModal) {
+            dom.runningModal.classList.remove('modal-fade-out');
+            dom.runningModal.classList.remove('hidden');
+        }
+        if (dom.runningViewClarify) {
+            dom.runningViewClarify.classList.add('hidden');
+        }
+        if (dom.runningViewProgress) {
+            dom.runningViewProgress.classList.remove('hidden');
+        }
         dom.runningTopicDisplay.textContent = `"${topic}"`;
-        dom.runningModal.classList.remove('hidden');
         dom.liveTimer.textContent = '00:00';
         dom.runningStatusMessage.textContent = SPINNER_MESSAGES[0];
         updateModalStepper(0);
@@ -2172,6 +2354,7 @@
         }
 
         state.startTime = Date.now();
+        clearInterval(state.timerInterval);
         state.timerInterval = setInterval(() => {
             const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
             const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
@@ -2180,6 +2363,7 @@
         }, 1000);
 
         let step = 0;
+        clearInterval(state.statusInterval);
         state.statusInterval = setInterval(() => {
             step = (step + 1) % SPINNER_MESSAGES.length;
             dom.runningStatusMessage.textContent = SPINNER_MESSAGES[step];
@@ -2187,19 +2371,48 @@
         }, statusIntervalMs);
     }
 
-    function stopRunningState() {
+    function stopRunningState(smoothFade = false) {
         state.running = false;
         clearInterval(state.timerInterval);
         clearInterval(state.statusInterval);
-        dom.runningModal.classList.add('hidden');
-        if (window.stopModalNeuralCanvas) {
-            window.stopModalNeuralCanvas();
+        if (fadeOutTimeout) {
+            clearTimeout(fadeOutTimeout);
+            fadeOutTimeout = null;
         }
-        updateModalStepper(0);
-        const stepper = document.getElementById('modal-pipeline-stepper');
-        if (stepper) {
-            const tracks = stepper.querySelectorAll('.stepper-track-fill');
-            tracks.forEach(trackEl => { trackEl.style.width = '0%'; });
+
+        if (smoothFade && dom.runningModal) {
+            dom.runningModal.classList.remove('hidden');
+            dom.runningModal.classList.add('modal-fade-out');
+            fadeOutTimeout = setTimeout(() => {
+                if (dom.runningModal) {
+                    dom.runningModal.classList.add('hidden');
+                    dom.runningModal.classList.remove('modal-fade-out');
+                }
+                if (window.stopModalNeuralCanvas) {
+                    window.stopModalNeuralCanvas();
+                }
+                updateModalStepper(0);
+                const stepper = document.getElementById('modal-pipeline-stepper');
+                if (stepper) {
+                    const tracks = stepper.querySelectorAll('.stepper-track-fill');
+                    tracks.forEach(trackEl => { trackEl.style.width = '0%'; });
+                }
+                fadeOutTimeout = null;
+            }, 320);
+        } else {
+            if (dom.runningModal) {
+                dom.runningModal.classList.add('hidden');
+                dom.runningModal.classList.remove('modal-fade-out');
+            }
+            if (window.stopModalNeuralCanvas) {
+                window.stopModalNeuralCanvas();
+            }
+            updateModalStepper(0);
+            const stepper = document.getElementById('modal-pipeline-stepper');
+            if (stepper) {
+                const tracks = stepper.querySelectorAll('.stepper-track-fill');
+                tracks.forEach(trackEl => { trackEl.style.width = '0%'; });
+            }
         }
     }
 
@@ -2214,6 +2427,9 @@
             dom.clarifyingContainer.classList.remove('hidden');
             dom.reportPayloadContainer.classList.add('hidden');
             dom.clarifyingQuestionText.textContent = data.clarifying_question;
+            if (dom.clarifyInlineTopicInput) {
+                dom.clarifyInlineTopicInput.value = data.topic || '';
+            }
             return;
         }
 
@@ -2240,9 +2456,29 @@
         const subQuestions = data.sub_questions || [];
         dom.metricTracks.textContent = subQuestions.length > 0 ? `${subQuestions.length} Tracks` : 'Deep Search';
 
+        // Duration Calculation
+        const durationSec = data.execution_time_seconds || 20;
+        const durationText = formatDuration(durationSec);
+
         // 4. Compute Tokens
         dom.metricTokens.textContent = data.tokens_used ? `${data.tokens_used.toLocaleString()} Tokens` : 'Standard';
-        dom.metricIterations.textContent = `${data.iteration_count || 1} Iteration${(data.iteration_count || 1) > 1 ? 's' : ''}`;
+        const iterCount = data.iteration_count || 1;
+        if (dom.metricIterations) {
+            dom.metricIterations.innerHTML = `
+                <span class="metric-status-dot dot-violet"></span>
+                <span>${iterCount} Reflection Iteration${iterCount > 1 ? 's' : ''}</span>
+            `;
+        }
+
+        // Pipeline Runtime Meta Chip (Hero Strip beside reading time)
+        if (dom.reportPipelineTimeText) {
+            dom.reportPipelineTimeText.textContent = `${durationText} Pipeline Time`;
+        }
+
+        // Chrome Telemetry Status Pill (Clean Synthesis Complete)
+        if (dom.resultsSynthesisStatusText) {
+            dom.resultsSynthesisStatusText.textContent = 'Synthesis Complete';
+        }
 
         // Sub-Questions Accordion
         if (dom.subquestionsContainer) {
@@ -2333,6 +2569,56 @@
         document.body.style.overflow = '';
     }
 
+    // -------------------------------------------------------------------------
+    // Topic Clarification Modal Open / Close Controls
+    // -------------------------------------------------------------------------
+    function openClarifyModal(topic, clarifyingQuestion) {
+        // Ensure running modal is active and visible
+        if (dom.runningModal) {
+            dom.runningModal.classList.remove('modal-fade-out');
+            dom.runningModal.classList.remove('hidden');
+        }
+        document.body.style.overflow = 'hidden';
+
+        // Switch internal card views smoothly in-place
+        if (dom.runningViewProgress) {
+            dom.runningViewProgress.classList.add('hidden');
+        }
+        if (dom.runningViewClarify) {
+            dom.runningViewClarify.classList.remove('hidden');
+        }
+
+        if (dom.modalClarifyingQuestionText) {
+            dom.modalClarifyingQuestionText.textContent = clarifyingQuestion;
+        }
+        if (dom.modalClarifyTopicInput) {
+            dom.modalClarifyTopicInput.value = topic || '';
+            if (dom.btnClearClarifyModalTopic) {
+                dom.btnClearClarifyModalTopic.classList.toggle('hidden', !topic);
+            }
+        }
+        setTimeout(() => {
+            if (dom.modalClarifyTopicInput) {
+                dom.modalClarifyTopicInput.focus();
+                dom.modalClarifyTopicInput.select();
+            }
+        }, 80);
+    }
+
+    function closeClarifyModal() {
+        stopRunningState(false);
+        if (dom.runningViewClarify) {
+            dom.runningViewClarify.classList.add('hidden');
+        }
+        if (dom.runningViewProgress) {
+            dom.runningViewProgress.classList.remove('hidden');
+        }
+        document.body.style.overflow = '';
+        if (dom.topicInput) {
+            dom.topicInput.focus();
+        }
+    }
+
     function toggleSubquestions() {
         if (!dom.subquestionsContainer) return;
         const isOpen = dom.subquestionsContainer.classList.toggle('is-open');
@@ -2408,6 +2694,11 @@
     // History Persistence
     // -------------------------------------------------------------------------
     function saveToHistory(topic, results) {
+        if (!results) return;
+        // Never store simulated mock/demo pipeline runs in recent enquiry history
+        if (results.request_id && String(results.request_id).startsWith('req_sim_')) return;
+        if (/^(default|demo|test)(\s*-\s*a)?$/i.test((topic || '').trim())) return;
+
         const item = {
             topic,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -2529,6 +2820,17 @@
             row.appendChild(delBtn);
             dom.historyList.appendChild(row);
         });
+    }
+
+    // Utility: Format seconds into clean readable duration (e.g. "20s", "1m 15s")
+    function formatDuration(totalSeconds) {
+        const sec = Math.max(1, Math.round(Number(totalSeconds) || 20));
+        if (sec < 60) {
+            return `${sec}s`;
+        }
+        const mins = Math.floor(sec / 60);
+        const remSec = sec % 60;
+        return remSec > 0 ? `${mins}m ${remSec}s` : `${mins}m`;
     }
 
     // Utility: HTML escape

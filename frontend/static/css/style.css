@@ -1182,7 +1182,7 @@ body {
     position: fixed;
     top: 11px;
     left: 14px;
-    z-index: 120;
+    z-index: 520;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1197,6 +1197,7 @@ body {
     color: var(--brand-orange-light);
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    will-change: left;
     transition: left 0.28s cubic-bezier(0.16, 1, 0.3, 1),
                 border-radius 0.2s ease,
                 background var(--transition-fast),
@@ -1303,7 +1304,7 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
 /* Ensure smooth transition when sidebar toggles */
 .stage-top-bar-inner,
 .results-top-bar-inner {
-    transition: padding 0.25s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.25s ease;
+    transition: padding 0.22s cubic-bezier(0.22, 1, 0.36, 1), max-width 0.22s ease;
 }
 
 @media (max-width: 768px) {
@@ -1336,41 +1337,91 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
 }
 
 /* --------------------------------------------------------------------------
-   SIDEBAR (Modernized Obsidian Galaxy Workspace)
+   SIDEBAR (Slide-Over Obsidian Galaxy Workspace)
+   - Slides over the body without resizing page content
+   - Hardware-accelerated GPU translation + premium cosmic glassmorphism fade
    -------------------------------------------------------------------------- */
 .app-sidebar {
-    width: 290px;
-    height: 100vh;
-    max-height: 100vh;
-    position: sticky;
+    position: fixed;
     top: 0;
-    background: linear-gradient(180deg, #0F101C 0%, #0A0A14 55%, #06060C 100%);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    left: 0;
+    bottom: 0;
+    width: 290px;
+    min-width: 290px;
+    max-width: 290px;
+    height: 100vh;
+    height: 100dvh;
+    background: linear-gradient(180deg, rgba(16, 17, 30, 0.94) 0%, rgba(10, 10, 18, 0.96) 55%, rgba(6, 6, 12, 0.98) 100%);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     padding: 1.15rem 1rem;
     flex-shrink: 0;
-    z-index: 100;
+    z-index: 500;
     box-sizing: border-box;
     overflow: hidden;
-    box-shadow: 8px 0 36px rgba(0, 0, 0, 0.55);
-    transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-                padding 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.2s ease,
-                border-color 0.28s ease;
+    box-shadow: 14px 0 44px rgba(0, 0, 0, 0.65), 0 0 80px rgba(0, 0, 0, 0.35), inset -1px 0 0 rgba(255, 126, 41, 0.12);
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    will-change: transform, opacity;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.28s;
 }
 
-/* Collapsed State */
+/* Collapsed State: Slides smoothly off-canvas to the left and fades out */
 .app-sidebar.collapsed {
-    width: 0 !important;
-    min-width: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    border-right: 1px solid transparent !important;
+    transform: translateX(-100%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.2s ease,
+                visibility 0.24s;
+}
+
+/* ==========================================================================
+   PREMIUM COSMIC SIDEBAR BACKDROP (Cinematic Faded Blur & Vignette)
+   ========================================================================== */
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 450;
+    background: linear-gradient(90deg, rgba(6, 7, 16, 0.38) 0%, rgba(6, 7, 16, 0.20) 450px, rgba(6, 7, 16, 0.08) 100%);
+    backdrop-filter: blur(3.5px) saturate(112%);
+    -webkit-backdrop-filter: blur(3.5px) saturate(112%);
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
-    overflow: hidden !important;
+    will-change: opacity, backdrop-filter;
+    transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                backdrop-filter 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.24s;
+}
+
+body.sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+/* Never show backdrop on login screen or when authenticated view is hidden */
+body:has(#view-login:not(.hidden)) .sidebar-backdrop,
+#view-authenticated.hidden .sidebar-backdrop {
+    display: none !important;
+}
+
+/* Prevent sidebar content from resizing or reflowing horizontally during slide in/out animations */
+.sidebar-brand,
+.sidebar-scroll-content,
+.sidebar-footer {
+    width: 100%;
+    min-width: 258px;
+    box-sizing: border-box;
 }
 
 /* Sidebar Brand Header */
@@ -2107,6 +2158,7 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
    -------------------------------------------------------------------------- */
 .app-main-stage {
     flex: 1;
+    min-width: 0;
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
@@ -4480,6 +4532,7 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
 .chip-langgraph svg { color: #FFA45A; }
 .chip-mcp svg { color: #38BDF8; }
 .chip-reading svg { color: #C084FC; }
+.chip-duration svg { color: #34D399; }
 
 /* ==========================================================================
    MISSION CONTROL METRICS HUD (4 AGENT TIERS)
@@ -5701,26 +5754,306 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
     color: rgba(255, 255, 255, 0.2);
 }
 
-/* Clarifying Panel */
+/* Clarifying Panel (Screen 2 In-Page HUD Card) */
 .clarifying-panel {
-    padding: 2.2rem;
-    border-top: 3px solid var(--brand-orange);
+    position: relative;
+    overflow: hidden;
+    padding: 2.2rem 2.5rem;
     text-align: center;
     margin-bottom: 2rem;
+    background: linear-gradient(145deg, rgba(20, 23, 44, 0.78) 0%, rgba(12, 14, 28, 0.86) 100%);
+    border: 1px solid rgba(255, 140, 50, 0.28);
+    border-radius: 20px;
+    box-shadow: 
+        0 25px 70px -15px rgba(0, 0, 0, 0.75),
+        0 0 35px rgba(255, 126, 41, 0.14),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+}
+
+.clarifying-top-accent {
+    position: absolute;
+    top: 0;
+    left: 8%;
+    right: 8%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 140, 50, 0.95) 50%, transparent);
+    box-shadow: 0 0 16px rgba(255, 126, 41, 0.9), 0 0 30px rgba(255, 126, 41, 0.4);
+}
+
+.clarifying-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+
+.clarifying-badge-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+}
+
+.clarifying-subtag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 180, 100, 0.9);
+    background: rgba(255, 126, 41, 0.1);
+    border: 1px solid rgba(255, 126, 41, 0.22);
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+}
+
+.pipe-dot.orange {
+    background: #FF7E29;
+    box-shadow: 0 0 8px rgba(255, 126, 41, 0.85);
 }
 
 .clarifying-title {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     font-weight: 800;
-    margin: 0.6rem 0 1rem;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.clarifying-guidance-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    max-width: 680px;
+    margin: 0 auto 1.5rem auto;
+    padding: 1.1rem 1.35rem;
+    background: rgba(255, 126, 41, 0.07);
+    border: 1px solid rgba(255, 126, 41, 0.22);
+    border-radius: 14px;
+    text-align: left;
+}
+
+.clarifying-icon-box {
+    color: #FF9B42;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
 }
 
 .clarifying-body {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: rgba(240, 243, 255, 0.92);
+    margin: 0;
+}
+
+.clarifying-input-container {
     max-width: 680px;
-    margin: 0 auto 1.5rem auto;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.clarifying-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(14, 17, 34, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 0.4rem 0.85rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.clarifying-input-wrapper:focus-within {
+    border-color: rgba(255, 140, 50, 0.65);
+    box-shadow: 0 0 0 3px rgba(255, 126, 41, 0.2);
+}
+
+.clarifying-input-icon {
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    margin-right: 0.6rem;
+    flex-shrink: 0;
+}
+
+.clarifying-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    padding: 0.55rem 0.2rem;
+    font-family: inherit;
+}
+
+.clarifying-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.clarifying-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* ==========================================================================
+   TOPIC CLARIFICATION MODAL STYLES
+   ========================================================================== */
+.clarify-modal-overlay {
+    z-index: 1060;
+    background: 
+        radial-gradient(ellipse 90% 75% at 50% 38%, rgba(255, 126, 41, 0.22) 0%, rgba(255, 95, 20, 0.08) 36%, transparent 72%),
+        radial-gradient(ellipse 85% 70% at 20% 70%, rgba(139, 92, 246, 0.22) 0%, rgba(99, 102, 241, 0.1) 38%, transparent 70%),
+        radial-gradient(ellipse 70% 60% at 82% 28%, rgba(45, 212, 191, 0.1) 0%, transparent 65%),
+        linear-gradient(180deg, #090A14 0%, #0D0F1E 50%, #080912 100%) !important;
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+}
+
+.clarify-modal-card {
+    max-width: 580px;
+    width: 100%;
+    padding: 2rem 2.35rem 1.9rem 2.35rem;
+    background: linear-gradient(145deg, rgba(20, 23, 44, 0.84) 0%, rgba(12, 14, 28, 0.92) 100%);
+    border: 1px solid rgba(255, 140, 50, 0.26);
+    box-shadow: 
+        0 35px 95px -15px rgba(0, 0, 0, 0.88),
+        0 0 45px rgba(255, 126, 41, 0.18),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.2);
+    animation: modalScaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.clarify-modal-top-accent {
+    position: absolute;
+    top: 0;
+    left: 8%;
+    right: 8%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 140, 50, 0.95) 50%, transparent);
+    box-shadow: 0 0 16px rgba(255, 126, 41, 0.9), 0 0 30px rgba(255, 126, 41, 0.4);
+}
+
+.clarify-brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FFA255 0%, #FF7E29 52%, #E65A00 100%);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 14px rgba(255, 126, 41, 0.45);
+    flex-shrink: 0;
+}
+
+.modal-pipe-badge.orange {
+    background: rgba(255, 126, 41, 0.12);
+    border: 1px solid rgba(255, 126, 41, 0.26);
+    color: #FFAA60;
+}
+
+.clarify-modal-hero {
+    margin-bottom: 1.15rem;
+}
+
+.clarify-modal-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: -0.02em;
+}
+
+.clarify-modal-subtitle {
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.clarify-modal-guidance {
+    padding: 1rem 1.25rem;
+    background: rgba(255, 126, 41, 0.07);
+    border: 1px solid rgba(255, 126, 41, 0.22);
+    border-radius: 14px;
+    margin-bottom: 1.35rem;
+}
+
+.clarify-guidance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #FFA552;
+    margin-bottom: 0.5rem;
+}
+
+.clarify-modal-question-body {
+    font-size: 0.94rem;
+    line-height: 1.65;
+    color: rgba(240, 243, 255, 0.95);
+    margin: 0;
+    font-weight: 450;
+}
+
+.clarify-modal-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.clarify-input-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-tertiary);
+    margin-bottom: 0.5rem;
+}
+
+.clarify-modal-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(14, 17, 34, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 0.3rem 0.85rem;
+    margin-bottom: 1.35rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.clarify-modal-input-wrapper:focus-within {
+    border-color: rgba(255, 140, 50, 0.65);
+    box-shadow: 0 0 0 3px rgba(255, 126, 41, 0.2);
+}
+
+.clarify-modal-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    padding: 0.65rem 0.4rem;
+    font-family: inherit;
+}
+
+.clarify-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.8rem;
 }
 
 /* ==========================================================================
@@ -5800,6 +6133,17 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
     padding: 1.5rem;
     overflow: hidden;
     animation: modalBackdropFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#running-modal.modal-overlay {
+    z-index: 1050;
+    background: 
+        radial-gradient(ellipse 90% 75% at 50% 38%, rgba(255, 126, 41, 0.22) 0%, rgba(255, 95, 20, 0.08) 36%, transparent 72%),
+        radial-gradient(ellipse 85% 70% at 20% 70%, rgba(139, 92, 246, 0.22) 0%, rgba(99, 102, 241, 0.1) 38%, transparent 70%),
+        radial-gradient(ellipse 70% 60% at 82% 28%, rgba(45, 212, 191, 0.1) 0%, transparent 65%),
+        linear-gradient(180deg, #090A14 0%, #0D0F1E 50%, #080912 100%);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
 }
 
 /* Modal Dedicated Galaxy Starfield Canvas */
@@ -5915,6 +6259,23 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
     overflow: hidden;
     z-index: 2;
     animation: modalScaleIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* In-Card Views (Smooth In-Place Crossfade between Running & Clarify) */
+.modal-card-view {
+    width: 100%;
+    animation: modalCardViewFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalCardViewFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Radiant solar amber top edge reflection */
@@ -6261,6 +6622,22 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
 @keyframes modalBackdropFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@keyframes modalBackdropFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.99);
+    }
+}
+
+.modal-overlay.modal-fade-out {
+    animation: modalBackdropFadeOut 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    pointer-events: none !important;
 }
 
 /* ==========================================================================
@@ -6909,7 +7286,8 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
         left: 0;
         bottom: 0;
         width: 300px;
-        max-width: 85vw;
+        min-width: 0 !important;
+        max-width: 85vw !important;
         height: 100vh;
         height: 100dvh;
         z-index: 1000;
@@ -6931,6 +7309,12 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
         pointer-events: none !important;
         visibility: hidden !important;
         transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, visibility 0.32s;
+    }
+
+    .sidebar-brand,
+    .sidebar-scroll-content,
+    .sidebar-footer {
+        min-width: 0 !important;
     }
 
     .sidebar-icon-dock,
@@ -6968,22 +7352,9 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
         display: block !important;
     }
 
-    /* Mobile drawer backdrop */
-    body.sidebar-open::after {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        z-index: 999;
-        pointer-events: auto;
-        animation: fadeIn 0.25s ease-out;
-    }
-
-    /* Never show mobile sidebar backdrop when login view is visible */
-    body:has(#view-login:not(.hidden))::after {
-        display: none !important;
+    /* Mobile drawer backdrop z-index alignment */
+    .sidebar-backdrop {
+        z-index: 950 !important;
     }
 
     /* --------------------------------------------------------------------------
@@ -7591,16 +7962,81 @@ body:has(#view-login:not(.hidden)) .sidebar-floating-toggle {
     }
 
     .clarifying-panel {
-        padding: 1.25rem 1rem !important;
+        padding: 1.4rem 1.1rem !important;
+        border-radius: var(--radius-lg) !important;
     }
 
     .clarifying-title {
-        font-size: 1.15rem !important;
+        font-size: 1.2rem !important;
+    }
+
+    .clarifying-guidance-box {
+        padding: 0.9rem 1rem !important;
+        gap: 0.65rem !important;
     }
 
     .clarifying-body {
         font-size: 0.88rem !important;
         line-height: 1.55 !important;
+    }
+
+    .clarifying-actions {
+        flex-direction: column-reverse !important;
+        width: 100% !important;
+    }
+
+    .clarifying-actions .btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* --------------------------------------------------------------------------
+       TOPIC CLARIFICATION MODAL MOBILE OPTIMIZATIONS
+       -------------------------------------------------------------------------- */
+    #modal-clarify-dialog.modal-overlay {
+        padding: 0.65rem !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-card {
+        padding: 1.35rem 1.15rem 1.2rem 1.15rem !important;
+        border-radius: var(--radius-lg) !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-header {
+        margin-bottom: 0.85rem !important;
+        padding-bottom: 0.65rem !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-title {
+        font-size: 1.15rem !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-subtitle {
+        font-size: 0.78rem !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-guidance {
+        padding: 0.85rem 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-question-body {
+        font-size: 0.86rem !important;
+        line-height: 1.55 !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-footer {
+        flex-direction: column-reverse !important;
+        width: 100% !important;
+        gap: 0.6rem !important;
+    }
+
+    #modal-clarify-dialog .clarify-modal-footer .btn {
+        width: 100% !important;
+        justify-content: center !important;
     }
 
     /* --------------------------------------------------------------------------

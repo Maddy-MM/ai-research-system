@@ -157,7 +157,12 @@ planner_prompt = ChatPromptTemplate.from_messages(
             "system",
             "You are a research planner. Break the user's topic into 2 to 3 sharply focused "
             "sub-questions whose answers together make a complete report. Keep sub-questions concise "
-            "and targeted so they can be researched effectively.",
+            "and targeted so they can be researched effectively. Bias strongly toward autonomous "
+            "execution: even for broad topics (e.g. 'climate change', 'artificial intelligence'), "
+            "autonomously formulate the 2 to 3 most critical, high-impact sub-questions (such as "
+            "core mechanisms, current breakthroughs, and key challenges) rather than halting for "
+            "clarification. Only set clarifying_question if the query is completely uninterpretable, "
+            "pure nonsense, or a single vague word with conflicting meanings (e.g. 'apple').",
         ),
         ("human", "Topic: {topic}\n\n{feedback_context}"),
     ]
