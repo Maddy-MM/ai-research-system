@@ -60,10 +60,13 @@ The system uses **LangGraph** to orchestrate planning, parallel research, writin
 - Resilient academic paper discovery — arXiv queries are keyword-sanitized, bounded with strict 5-second socket and executor timeouts, and automatically fail over to Tavily academic search on rate-limits (HTTP 429/503), preventing pipeline hangs on cloud deployments
 - Iterative critic loop — structured verdict (score + issue type) routes back to the planner (missing info) or the writer (unclear/unsupported), bounded by an iteration cap and a token budget
 - Independent citation verification — a tool-using verifier agent re-checks the report's most load-bearing claims against fresh sources (not just the original research), then a structured chain gives a yes/no/partial verdict per claim
+- Step-level execution telemetry and runtime benchmarks — tracks exact durations for Planner, Researchers, Writer, Critic, and Verifier nodes, persisted in the database and exposed via API
+- Interactive Pipeline Execution Telemetry & Trace HUD — dedicated modal featuring total duration, reflection iterations, token breakdown, and in-place 3D flipping cards that reveal agent queries, model parameters, and execution timings
 - Optional LangSmith tracing for full pipeline observability during development
 - Prometheus metrics for pipeline observability
 - Structured JSON logging across all backend components
-- Production Scholar-Tech UI with Obsidian/Solar-Amber aesthetic, Screen 0 Login, collapsible enquiry history sidebar, open-air SVG circuit schematic, Screen 2 Dossier with bounded scrollable verification/critic panels, and markdown/print exports
+- Production Scholar-Tech UI with Obsidian/Solar-Amber aesthetic, Screen 0 Login, collapsible enquiry history sidebar, open-air SVG circuit schematic, Screen 2 Dossier with smooth mouse-wheel scroll-chaining over verification/critic panels, full-screen dossier reader modal, and markdown/print exports
+- Responsive cross-device polish — seamless mobile and tablet layout with faint crosshair HUD dividers, compact responsive headers, inline title copy feedback, and automatic modal/sidebar visibility synchronization
 - Full async test suite with mocked pipeline
 
 ---
@@ -172,7 +175,16 @@ ResearchMind uses **database-backed JWT Bearer authentication** with **bcrypt pa
   "critic_score": 0.8,
   "iteration_count": 1,
   "tokens_used": 1500,
-  "sub_questions": ["..."]
+  "sub_questions": ["..."],
+  "execution_time_seconds": 24.5,
+  "agent_timings": {
+    "planner": 1.4,
+    "researcher": 8.2,
+    "writer": 6.5,
+    "critic": 1.2,
+    "verifier": 4.1
+  },
+  "model_name": "gpt-5-nano"
 }
 ```
 
@@ -197,9 +209,10 @@ ResearchMind features a production **Pure Vanilla Modern Web Interface** (HTML5 
 - **Screen 0 (Login View):** Clean obsidian glass card with demo credential quick-fill, password reveal, and real-time JWT token state.
 - **Left Sidebar:** Collapsible drawer with "New Research" trigger, elevated Recent Enquiries deck with local storage caching, live engine telemetry, GitHub repository link, and Sign Out action.
 - **Screen 1 (Search & Pipeline Cockpit):** Split view with query input, inquiry focus pills, search depth toggles, and an interactive SVG circuit schematic diagram visualizing the 5 LangGraph stages.
-- **Telemetry Modal:** Live animated modal with stage progress stepper, monospace timer, neural canvas, and active phase status updates.
-- **Screen 2 (Results & Dossier View):** Top action bar (Export Markdown, Export PDF, Print, Share, New Research), metrics strip (word count, sources vetted, execution time, token metrics), rendered Markdown report via `marked.js`, and side-by-side bounded scrollable cards for **Independent Verification** (claim fact-checking) and **Critic Review** (quality scoring & reflection loop).
-- **Zoom Prevention & Mobile Support:** Native `touch-action` and gesture handlers preventing mobile/desktop pinch zoom while maintaining smooth scrolling.
+- **Telemetry & Execution Trace HUD Modal:** Live animated modal with stage progress stepper, monospace timer, neural canvas, and an interactive **Pipeline Trace HUD**. Displays overall execution duration, reflection iterations, and token consumption, featuring in-place 3D flipping cards that expose agent queries, model parameters, and step execution time benchmarks.
+- **Screen 2 (Results & Dossier View):** Top action bar (Export Markdown, Export PDF, Print, Share, New Research), inline title copy action with clipboard feedback, metrics strip (word count, sources vetted, execution time, token metrics), rendered Markdown report via `marked.js`, and side-by-side cards for **Independent Verification** (claim fact-checking) and **Critic Review** (quality scoring & reflection loop) with smooth mouse-wheel scroll-chaining.
+- **Full-Screen Dossier Reader Modal:** Immersive reading view with real-time word count, estimated reading time, and single-click markdown export and clipboard copy actions.
+- **Cross-Device Responsive Polish:** Tailored layouts across desktop, tablet, and mobile with faint crosshair HUD dividers, adaptive single-line eyebrow headers, touch-friendly controls, and automatic sidebar toggle synchronization during modal sessions.
 
 *(An optional legacy Streamlit prototype is preserved under `frontend/app.py` for comparative reference).*
 
