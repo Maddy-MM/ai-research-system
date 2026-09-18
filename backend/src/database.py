@@ -46,6 +46,16 @@ def init_db() -> None:
                         "ALTER TABLE research_reports ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id);"
                     )
                 )
+                conn.execute(
+                    text(
+                        "ALTER TABLE research_reports ADD COLUMN IF NOT EXISTS execution_time_seconds FLOAT;"
+                    )
+                )
+                conn.execute(
+                    text(
+                        "ALTER TABLE research_reports ADD COLUMN IF NOT EXISTS agent_timings_json TEXT;"
+                    )
+                )
                 conn.commit()
             elif engine.dialect.name == "sqlite":
                 res = conn.execute(
@@ -56,6 +66,20 @@ def init_db() -> None:
                     conn.execute(
                         text(
                             "ALTER TABLE research_reports ADD COLUMN user_id INTEGER REFERENCES users(id);"
+                        )
+                    )
+                    conn.commit()
+                if cols and "execution_time_seconds" not in cols:
+                    conn.execute(
+                        text(
+                            "ALTER TABLE research_reports ADD COLUMN execution_time_seconds FLOAT;"
+                        )
+                    )
+                    conn.commit()
+                if cols and "agent_timings_json" not in cols:
+                    conn.execute(
+                        text(
+                            "ALTER TABLE research_reports ADD COLUMN agent_timings_json TEXT;"
                         )
                     )
                     conn.commit()

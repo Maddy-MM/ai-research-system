@@ -1,3 +1,4 @@
+import time
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from src.auth import get_current_user
+from src.config import get_settings
 from src.database import User, get_db
 from src.models import ResearchReport
 from src.logging import get_logger
@@ -30,6 +32,9 @@ class ResearchResponse(BaseModel):
     iteration_count: int | None = None
     tokens_used: int | None = None
     sub_questions: list[str] | None = None
+    execution_time_seconds: float | None = None
+    agent_timings: dict[str, float] | None = None
+    model_name: str | None = None
 
 
 @router.post("/run", response_model=ResearchResponse)
@@ -49,6 +54,7 @@ async def run_research(
         },
     )
 
+    start_time = time.perf_counter()
     try:
         state = await run_research_pipeline(
             topic=request.topic,
@@ -65,6 +71,8 @@ async def run_research(
             detail=f"Pipeline failed: {str(e)}",
         )
 
+    execution_time_seconds = round(time.perf_counter() - start_time, 2)
+
     response_data = ResearchResponse(
         request_id=request_id,
         topic=request.topic,
@@ -76,6 +84,9 @@ async def run_research(
         iteration_count=state.get("iteration_count"),
         tokens_used=state.get("tokens_used"),
         sub_questions=state.get("sub_questions"),
+        execution_time_seconds=execution_time_seconds,
+        agent_timings=state.get("agent_timings"),
+        model_name=get_settings().OPENAI_MODEL,
     )
 
     try:
@@ -91,8 +102,10 @@ async def run_research(
             critic_score=response_data.critic_score,
             iteration_count=response_data.iteration_count,
             tokens_used=response_data.tokens_used,
+            execution_time_seconds=execution_time_seconds,
         )
         db_report.sub_questions = response_data.sub_questions
+        db_report.agent_timings = response_data.agent_timings
         db.add(db_report)
         db.commit()
     except Exception as e:
@@ -122,6 +135,7 @@ def get_history(
         .all()
     )
 
+    current_model = get_settings().OPENAI_MODEL
     return [
         ResearchResponse(
             request_id=r.request_id,
@@ -134,6 +148,9 @@ def get_history(
             iteration_count=r.iteration_count,
             tokens_used=r.tokens_used,
             sub_questions=r.sub_questions,
+            execution_time_seconds=r.execution_time_seconds,
+            agent_timings=r.agent_timings,
+            model_name=current_model,
         )
         for r in reports
     ]

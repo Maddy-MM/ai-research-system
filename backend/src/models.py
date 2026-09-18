@@ -32,7 +32,9 @@ class ResearchReport(Base):
     critic_score = Column(Float, nullable=True)
     iteration_count = Column(Integer, nullable=True)
     tokens_used = Column(Integer, nullable=True)
+    execution_time_seconds = Column(Float, nullable=True)
     sub_questions_json = Column(Text, nullable=True)
+    agent_timings_json = Column(Text, nullable=True)
     created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -56,3 +58,19 @@ class ResearchReport(Base):
             self.sub_questions_json = json.dumps(value)
         else:
             self.sub_questions_json = None
+
+    @property
+    def agent_timings(self) -> dict | None:
+        if self.agent_timings_json:
+            try:
+                return json.loads(self.agent_timings_json)
+            except Exception:
+                return None
+        return None
+
+    @agent_timings.setter
+    def agent_timings(self, value: dict | None) -> None:
+        if value is not None:
+            self.agent_timings_json = json.dumps(value)
+        else:
+            self.agent_timings_json = None

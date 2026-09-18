@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23FF7E29'/%3E%3Cpath d='M16 5.5L28 11.5L16 17.5L4 11.5Z' fill='%23FFFFFF'/%3E%3Cpath d='M7.5 14v4.5C7.5 21.8 11.2 24.5 16 24.5s8.5-2.7 8.5-6V14' fill='none' stroke='%23FFFFFF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M28 11.5v6.5' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='28' cy='19.5' r='1.4' fill='%23FFFFFF'/%3E%3Cpolygon points='16,8.8 18.2,11.5 16,14.2 13.8,11.5' fill='%23FF7E29'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260916_14">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260918_05">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body class="bg-dark text-light">
@@ -836,15 +836,33 @@
                                             <span class="dossier-sep">·</span>
                                             <span class="dossier-meta-item">Multi-Agent Consensus Verified</span>
                                         </div>
-                                        <button type="button" id="btn-copy-topic" class="btn-copy-topic-pill hide-on-mobile" title="Copy topic headline" aria-label="Copy topic headline">
-                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <div class="report-header-actions-cluster">
+                                            <button type="button" id="btn-open-pipeline-telemetry" class="btn-telemetry-trigger" title="Inspect multi-agent execution timeline and loop trace" aria-label="Open pipeline execution trace">
+                                                <span class="telemetry-trigger-dot"></span>
+                                                <svg class="telemetry-trigger-clock" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <polyline points="12 6 12 12 14 14"></polyline>
+                                                </svg>
+                                                <span id="telemetry-trigger-duration">5m 38s Pipeline Trace</span>
+                                                <svg class="trigger-arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                                                    <polyline points="7 7 17 7 17 17"></polyline>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="report-title-wrap">
+                                        <h1 id="results-topic-title" class="report-topic-title"></h1>
+                                        <button type="button" id="btn-copy-topic" class="btn-copy-title-inline" title="Copy title to clipboard" aria-label="Copy topic title">
+                                            <svg class="copy-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                             </svg>
-                                            <span class="copy-topic-text">Copy Title</span>
+                                            <svg class="check-icon hidden" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
                                         </button>
                                     </div>
-                                    <h1 id="results-topic-title" class="report-topic-title"></h1>
                                     <div class="report-meta-chips-bar">
                                         <span class="meta-chip chip-langgraph">
                                             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
@@ -857,10 +875,6 @@
                                         <span class="meta-chip chip-reading" id="report-reading-time">
                                             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                             <span>~1,200 Words · 5 Min Read</span>
-                                        </span>
-                                        <span class="meta-chip chip-duration" id="report-pipeline-time">
-                                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-                                            <span id="report-pipeline-time-text">20s Pipeline Time</span>
                                         </span>
                                     </div>
                                 </div>
@@ -1224,14 +1238,6 @@
 
                 <!-- VIEW 2: TOPIC CLARIFICATION IN-PLACE (ZERO FLICKER) -->
                 <div id="running-view-clarify" class="modal-card-view hidden">
-                    <!-- Top-Right Dedicated Circular Close Button -->
-                    <button type="button" id="btn-close-clarify-modal" class="btn-modal-close-circle" title="Close clarification (Esc)" aria-label="Close clarification">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-
                     <!-- Modal Console Header Bar -->
                     <div class="modal-console-header clarify-modal-header">
                         <div class="modal-brand-tag">
@@ -1245,6 +1251,13 @@
                             <span class="modal-brand-title">Topic Ambiguous</span>
                             <span class="modal-pipe-badge orange"><span class="pipe-dot orange"></span> Scope Calibration</span>
                         </div>
+                        <!-- Top-Right Dedicated Circular Close Button -->
+                        <button type="button" id="btn-close-clarify-modal" class="btn-modal-close-circle" title="Close clarification (Esc)" aria-label="Close clarification">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
                     </div>
 
                     <!-- Modal Hero Section -->
@@ -1301,6 +1314,358 @@
             </div>
         </div>
 
+        <!-- AGENT EXECUTION TELEMETRY & LOOP TRACE MODAL OVERLAY -->
+        <div id="modal-pipeline-telemetry" class="modal-overlay telemetry-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-telemetry-title">
+            <div class="telemetry-modal-card modal-card glass-panel" id="telemetry-modal-card">
+                <!-- Radiant solar amber top edge reflection (matching Ambiguity modal) -->
+                <div class="modal-top-accent"></div>
+
+                <!-- Modal Console Header Bar -->
+                <!-- Modal Console Header Bar -->
+                <div class="telemetry-modal-header">
+                    <div class="telemetry-header-left">
+                        <div class="telemetry-badge-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 14 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="telemetry-title-group">
+                            <div class="telemetry-eyebrow">
+                                <span class="telemetry-status-dot"></span>
+                                <span>Multi-Agent DAG Execution Telemetry &middot; LangGraph v0.2</span>
+                            </div>
+                            <h3 id="modal-telemetry-title" class="telemetry-modal-title">Pipeline Runtime &amp; Loop Dynamics</h3>
+                        </div>
+                    </div>
+
+                    <!-- Top-Right Dedicated Circular Close Button -->
+                    <button type="button" id="btn-close-telemetry-modal" class="btn-modal-close-circle" title="Close telemetry modal (Esc)" aria-label="Close telemetry modal">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Scrollable Content -->
+                <div class="telemetry-modal-body" id="telemetry-modal-scroll">
+                    <!-- Unified HUD Overview Metrics Bar (Single Integrated Strip) -->
+                    <div class="telemetry-overview-bar">
+                        <div class="telemetry-stat-cell total-time">
+                            <div class="stat-cell-label">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                                <span>Total Duration</span>
+                            </div>
+                            <span class="stat-cell-value" id="modal-telemetry-total-time">—</span>
+                        </div>
+                        <div class="stat-cell-divider"></div>
+                        <div class="telemetry-stat-cell">
+                            <div class="stat-cell-label">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                <span>Reflection Cycles</span>
+                            </div>
+                            <span class="stat-cell-value" id="modal-telemetry-iterations">1 Reflection</span>
+                        </div>
+                        <div class="stat-cell-divider"></div>
+                        <div class="telemetry-stat-cell">
+                            <div class="stat-cell-label">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+                                <span>Compute Tokens</span>
+                            </div>
+                            <span class="stat-cell-value" id="modal-telemetry-tokens">—</span>
+                        </div>
+                        <div class="stat-cell-divider"></div>
+                        <div class="telemetry-stat-cell">
+                            <div class="stat-cell-label">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <span>Quality Gate</span>
+                            </div>
+                            <span class="stat-cell-value text-emerald">Approved (&ge; 0.70)</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 1: INTERACTIVE PIPELINE FLOW ARCHITECTURE -->
+                    <div class="telemetry-section-box">
+                        <div class="telemetry-section-header">
+                            <div class="section-badge-icon">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                    <polyline points="2 17 12 22 22 17"></polyline>
+                                    <polyline points="2 12 12 17 22 12"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="telemetry-section-title">Autonomous Execution Pipeline Workflow</span>
+                                <span class="telemetry-section-subtitle">Synchronized Multi-Agent StateGraph DAG</span>
+                            </div>
+                            <!-- In-Place Card Flip Action Button -->
+                            <button type="button" id="btn-toggle-flow-flip" class="btn-flow-flip" title="Flip cards to inspect agent metadata and execution specs">
+                                <svg class="flip-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="17 1 21 5 17 9"></polyline>
+                                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                                    <polyline points="7 23 3 19 7 15"></polyline>
+                                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                                </svg>
+                                <span id="flow-flip-btn-label">Flip Cards</span>
+                            </button>
+                        </div>
+
+                        <!-- Visual Interactive Flow Diagram (3D In-Place Flip Cards) -->
+                        <div class="telemetry-flow-container">
+                            <!-- Step 1: Planner -->
+                            <div class="flow-node node-planner" id="flow-node-planner" title="Click card or Flip button to view agent specs">
+                                <div class="flow-node-card-inner">
+                                    <!-- FRONT FACE -->
+                                    <div class="flow-node-face flow-node-front">
+                                        <div class="flow-node-topbar">
+                                            <span class="flow-node-step">Step 01</span>
+                                            <span class="flow-node-role-tag tag-amber">Plan</span>
+                                        </div>
+                                        <div class="flow-node-body">
+                                            <div class="flow-node-icon icon-amber">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                                            </div>
+                                            <div class="flow-node-name">Planner</div>
+                                            <div class="flow-node-desc">Sub-query breakdown</div>
+                                        </div>
+                                        <div class="flow-node-bottom">
+                                            <div class="flow-time-capsule" id="flow-time-planner">
+                                                <span class="time-segment-val" id="flow-time-planner-val">—</span>
+                                                <span class="time-segment-divider"></span>
+                                                <span class="time-segment-pct" id="flow-time-planner-pct">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- BACK FACE -->
+                                    <div class="flow-node-face flow-node-back">
+                                        <div class="flow-node-back-content">
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Queries</span>
+                                                <span class="flow-spec-value" id="flow-spec-planner-queries">3 Tracks</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Clarify</span>
+                                                <span class="flow-spec-value" id="flow-spec-planner-clarify">Passed</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Model</span>
+                                                <span class="flow-spec-value" id="flow-spec-planner-model">gpt-5-nano</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flow-connector">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                            </div>
+
+                            <!-- Step 2: Researchers -->
+                            <div class="flow-node node-researcher" id="flow-node-researcher" title="Click card or Flip button to view agent specs">
+                                <div class="flow-node-card-inner">
+                                    <!-- FRONT FACE -->
+                                    <div class="flow-node-face flow-node-front">
+                                        <div class="flow-node-topbar">
+                                            <span class="flow-node-step">Step 02</span>
+                                            <span class="flow-node-role-tag tag-cyan">Swarm</span>
+                                        </div>
+                                        <div class="flow-node-body">
+                                            <div class="flow-node-icon icon-cyan">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                            </div>
+                                            <div class="flow-node-name">Researchers</div>
+                                            <div class="flow-node-desc">Parallel Web &amp; arXiv</div>
+                                        </div>
+                                        <div class="flow-node-bottom">
+                                            <div class="flow-time-capsule" id="flow-time-researcher">
+                                                <span class="time-segment-val" id="flow-time-researcher-val">—</span>
+                                                <span class="time-segment-divider"></span>
+                                                <span class="time-segment-pct" id="flow-time-researcher-pct">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- BACK FACE -->
+                                    <div class="flow-node-face flow-node-back">
+                                        <div class="flow-node-back-content">
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Swarm</span>
+                                                <span class="flow-spec-value" id="flow-spec-researcher-swarm">3 Parallel</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Protocol</span>
+                                                <span class="flow-spec-value" id="flow-spec-researcher-tools">Tavily + arXiv</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Sources</span>
+                                                <span class="flow-spec-value" id="flow-spec-researcher-sources">3 Sources</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flow-connector">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                            </div>
+
+                            <!-- Step 3: Writer / Synthesizer -->
+                            <div class="flow-node node-writer" id="flow-node-writer" title="Click card or Flip button to view agent specs">
+                                <div class="flow-node-card-inner">
+                                    <!-- FRONT FACE -->
+                                    <div class="flow-node-face flow-node-front">
+                                        <div class="flow-node-topbar">
+                                            <span class="flow-node-step">Step 03</span>
+                                            <span class="flow-node-role-tag tag-purple">Draft</span>
+                                        </div>
+                                        <div class="flow-node-body">
+                                            <div class="flow-node-icon icon-purple">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                            </div>
+                                            <div class="flow-node-name">Synthesizer</div>
+                                            <div class="flow-node-desc">Cross-track synthesis</div>
+                                        </div>
+                                        <div class="flow-node-bottom">
+                                            <div class="flow-time-capsule" id="flow-time-writer">
+                                                <span class="time-segment-val" id="flow-time-writer-val">—</span>
+                                                <span class="time-segment-divider"></span>
+                                                <span class="time-segment-pct" id="flow-time-writer-pct">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- BACK FACE -->
+                                    <div class="flow-node-face flow-node-back">
+                                        <div class="flow-node-back-content">
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Words</span>
+                                                <span class="flow-spec-value" id="flow-spec-writer-words">3,789 Words</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Sections</span>
+                                                <span class="flow-spec-value" id="flow-spec-writer-sections">Sections Ready</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Read</span>
+                                                <span class="flow-spec-value" id="flow-spec-writer-readtime">~17 Min Read</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flow-connector">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                            </div>
+
+                            <!-- Step 4: Critic (with Loop Branch) -->
+                            <div class="flow-node node-critic" id="flow-node-critic" title="Click card or Flip button to view agent specs">
+                                <div class="flow-node-card-inner">
+                                    <!-- FRONT FACE -->
+                                    <div class="flow-node-face flow-node-front">
+                                        <div class="flow-node-topbar">
+                                            <span class="flow-node-step">Step 04</span>
+                                            <span class="flow-node-role-tag tag-amber">Gate</span>
+                                        </div>
+                                        <div class="flow-node-body">
+                                            <div class="flow-node-icon icon-amber">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                            </div>
+                                            <div class="flow-node-name">Critic &amp; Gate</div>
+                                            <div class="flow-node-desc">Reflection Score &ge; 0.70</div>
+                                        </div>
+                                        <div class="flow-node-bottom">
+                                            <div class="flow-time-capsule" id="flow-time-critic">
+                                                <span class="time-segment-val" id="flow-time-critic-val">—</span>
+                                                <span class="time-segment-divider"></span>
+                                                <span class="time-segment-pct" id="flow-time-critic-pct">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- BACK FACE -->
+                                    <div class="flow-node-face flow-node-back">
+                                        <div class="flow-node-back-content">
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Score</span>
+                                                <span class="flow-spec-value" id="flow-spec-critic-score">8.2 / 10 Approved</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Gate</span>
+                                                <span class="flow-spec-value" id="flow-spec-critic-threshold">Score &ge; 0.70</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Cycles</span>
+                                                <span class="flow-spec-value" id="flow-spec-critic-loop">1 Cycle</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flow-connector">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                            </div>
+
+                            <!-- Step 5: Verifier -->
+                            <div class="flow-node node-verifier" id="flow-node-verifier" title="Click card or Flip button to view agent specs">
+                                <div class="flow-node-card-inner">
+                                    <!-- FRONT FACE -->
+                                    <div class="flow-node-face flow-node-front">
+                                        <div class="flow-node-topbar">
+                                            <span class="flow-node-step">Step 05</span>
+                                            <span class="flow-node-role-tag tag-emerald">Audit</span>
+                                        </div>
+                                        <div class="flow-node-body">
+                                            <div class="flow-node-icon icon-emerald">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                            </div>
+                                            <div class="flow-node-name">Fact Verifier</div>
+                                            <div class="flow-node-desc">Citation &amp; fact audit</div>
+                                        </div>
+                                        <div class="flow-node-bottom">
+                                            <div class="flow-time-capsule" id="flow-time-verifier">
+                                                <span class="time-segment-val" id="flow-time-verifier-val">—</span>
+                                                <span class="time-segment-divider"></span>
+                                                <span class="time-segment-pct" id="flow-time-verifier-pct">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- BACK FACE -->
+                                    <div class="flow-node-face flow-node-back">
+                                        <div class="flow-node-back-content">
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Claims</span>
+                                                <span class="flow-spec-value" id="flow-spec-verifier-claims">95/101 Verified</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Integrity</span>
+                                                <span class="flow-spec-value" id="flow-spec-verifier-integrity">100% Validated</span>
+                                            </div>
+                                            <div class="flow-spec-block">
+                                                <span class="flow-spec-label">Engine</span>
+                                                <span class="flow-spec-value" id="flow-spec-verifier-engine">Independent</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <footer class="telemetry-modal-footer">
+                    <div class="telemetry-footer-status">
+                        <span class="footer-dot green"></span>
+                        <span id="telemetry-footer-summary">Execution verified by LangGraph multi-agent DAG consensus</span>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
         <!-- FULL RESEARCH REPORT MODAL OVERLAY -->
         <div id="modal-report-viewer" class="modal-overlay report-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
             <!-- Modal Dedicated Ambient Lighting -->
@@ -1337,9 +1702,10 @@
                         <div class="report-modal-title-group">
                             <div class="report-modal-eyebrow">
                                 <span class="report-modal-status-dot"></span>
-                                <span>Multi-Agent Consensus Synthesis</span>
+                                <span class="eyebrow-label-full">Multi-Agent Consensus Synthesis</span>
+                                <span class="eyebrow-label-short">Synthesis</span>
                                 <span class="modal-sep">·</span>
-                                <span id="modal-report-meta">~1,200 Words · 5 Min Read</span>
+                                <span id="modal-report-meta"><span class="meta-words">~1,200 Words</span> <span class="meta-sep">·</span> <span class="meta-read-full">5 Min Read</span><span class="meta-read-short">5m Read</span></span>
                             </div>
                             <h2 id="modal-report-title" class="report-modal-title">Executive Research Synthesis</h2>
                         </div>
@@ -1382,6 +1748,6 @@
     </div>
 
     <!-- Application Script -->
-    <script src="/static/js/app.js?v=20260916_14"></script>
+    <script src="/static/js/app.js?v=20260918_05"></script>
 </body>
 </html>

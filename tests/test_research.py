@@ -21,6 +21,7 @@ async def test_research_run_success(client, auth_headers, mock_pipeline):
     assert "iteration_count" in body
     assert "tokens_used" in body
     assert "sub_questions" in body
+    assert "execution_time_seconds" in body
 
     assert body["topic"] == "artificial intelligence"
     assert body["report"] == "Mocked research report"

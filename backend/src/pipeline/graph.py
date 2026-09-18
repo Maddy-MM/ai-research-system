@@ -90,6 +90,7 @@ def planner_node(state: ResearchState) -> dict:
         "sub_questions": plan.sub_questions,
         "clarifying_question": plan.clarifying_question,
         "tokens_used": tokens,
+        "agent_timings": {"planner": round(step_duration, 2)},
     }
 
 
@@ -143,6 +144,7 @@ async def researcher_node(state: ResearchState) -> dict:
     return {
         "research_results": [{"sub_question": sub_question, "content": content}],
         "tokens_used": tokens,
+        "research_timings": [{"sub_question": sub_question, "duration_s": round(step_duration, 2)}],
     }
 
 
@@ -192,7 +194,17 @@ def write_node(state: ResearchState) -> dict:
         },
     )
 
-    return {"report": strip_thinking(response.content), "tokens_used": tokens}
+    research_timings = state.get("research_timings", [])
+    max_research_duration = max((rt.get("duration_s", 0) for rt in research_timings), default=0)
+
+    return {
+        "report": strip_thinking(response.content),
+        "tokens_used": tokens,
+        "agent_timings": {
+            "researcher": round(max_research_duration, 2),
+            "writer": round(step_duration, 2),
+        },
+    }
 
 
 def critique_node(state: ResearchState) -> dict:
@@ -235,6 +247,7 @@ def critique_node(state: ResearchState) -> dict:
         "issue_type": verdict.issue_type,
         "iteration_count": state.get("iteration_count", 0) + 1,
         "tokens_used": tokens,
+        "agent_timings": {"critic": round(step_duration, 2)},
     }
 
 
@@ -316,7 +329,11 @@ async def verify_node(state: ResearchState) -> dict:
         },
     )
 
-    return {"verification_summary": summary, "tokens_used": tokens}
+    return {
+        "verification_summary": summary,
+        "tokens_used": tokens,
+        "agent_timings": {"verifier": round(step_duration, 2)},
+    }
 
 
 def route_after_critic(state: ResearchState) -> str:

@@ -19,3 +19,5 @@ class ResearchState(TypedDict):
     issue_type: Literal["missing_info", "unclear_writing", "unsupported_claims", "none"]
     iteration_count: int
     tokens_used: Annotated[int, operator.add]
+    agent_timings: Annotated[dict[str, float], operator.or_]
+    research_timings: Annotated[list[dict], operator.add]
