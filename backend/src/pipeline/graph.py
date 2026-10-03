@@ -21,8 +21,8 @@ from src.pipeline.utils import strip_thinking, sum_tokens
 
 logger = get_logger(__name__)
 
-CRITIC_THRESHOLD = 0.7
-MAX_ITERATIONS = 1
+CRITIC_THRESHOLD = 0.8
+MAX_ITERATIONS = 2
 TOKEN_BUDGET_PER_RUN = 30000
 
 _mcp_tools_cache = None

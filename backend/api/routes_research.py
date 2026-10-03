@@ -1,17 +1,19 @@
+import json
 import time
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from src.auth import get_current_user
 from src.config import get_settings
-from src.database import User, get_db
+from src.database import User, get_db, SessionLocal
 from src.models import ResearchReport
 from src.logging import get_logger
 from src.metrics import PIPELINE_REQUESTS_TOTAL
-from src.pipeline.pipeline import run_research_pipeline
+from src.pipeline.pipeline import run_research_pipeline, stream_research_pipeline
 
 router = APIRouter(prefix="/research", tags=["Research"])
 logger = get_logger(__name__)
@@ -116,6 +118,89 @@ async def run_research(
         )
 
     return response_data
+
+
+@router.post("/run-stream")
+async def run_research_stream(
+    request: ResearchRequest,
+    current_user: User = Depends(get_current_user),
+):
+    request_id = str(uuid.uuid4())
+    logger.info(
+        "Research stream request received",
+        extra={
+            "topic": request.topic,
+            "user": current_user.username,
+            "request_id": request_id,
+        },
+    )
+
+    async def event_generator():
+        yield f"data: {json.dumps({'event': 'connected', 'request_id': request_id})}\n\n"
+
+        async for item in stream_research_pipeline(request.topic, request_id):
+            if item.get("event") == "complete":
+                state = item.get("state", {})
+                exec_time = item.get("execution_time_seconds", 0)
+                resp_payload = {
+                    "request_id": request_id,
+                    "topic": request.topic,
+                    "report": state.get("report"),
+                    "feedback": state.get("feedback"),
+                    "verification": state.get("verification_summary"),
+                    "clarifying_question": state.get("clarifying_question") or None,
+                    "critic_score": state.get("critic_score"),
+                    "iteration_count": state.get("iteration_count"),
+                    "tokens_used": state.get("tokens_used"),
+                    "sub_questions": state.get("sub_questions"),
+                    "execution_time_seconds": exec_time,
+                    "agent_timings": state.get("agent_timings"),
+                    "model_name": get_settings().OPENAI_MODEL,
+                }
+
+                # Save to database in local session
+                try:
+                    db = SessionLocal()
+                    try:
+                        db_report = ResearchReport(
+                            request_id=request_id,
+                            user_id=current_user.id,
+                            username=current_user.username,
+                            topic=request.topic,
+                            report=resp_payload["report"],
+                            feedback=resp_payload["feedback"],
+                            verification=resp_payload["verification"],
+                            clarifying_question=resp_payload["clarifying_question"],
+                            critic_score=resp_payload["critic_score"],
+                            iteration_count=resp_payload["iteration_count"],
+                            tokens_used=resp_payload["tokens_used"],
+                            execution_time_seconds=exec_time,
+                        )
+                        db_report.sub_questions = resp_payload["sub_questions"]
+                        db_report.agent_timings = resp_payload["agent_timings"]
+                        db.add(db_report)
+                        db.commit()
+                    finally:
+                        db.close()
+                except Exception as db_err:
+                    logger.error(
+                        "Failed to save streamed report to database",
+                        extra={"error": str(db_err), "request_id": request_id},
+                    )
+
+                yield f"data: {json.dumps({'event': 'complete', 'data': resp_payload})}\n\n"
+            else:
+                yield f"data: {json.dumps(item)}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/history", response_model=list[ResearchResponse])

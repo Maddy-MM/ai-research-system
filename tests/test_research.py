@@ -184,3 +184,35 @@ async def test_delete_individual_history_item(client, auth_headers, mock_pipelin
     # Trying to delete already deleted item returns 404
     del_res_404 = await client.delete(f"/research/history/{req_id1}", headers=auth_headers)
     assert del_res_404.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_research_run_stream_success(client, auth_headers):
+    async def fake_stream(topic, request_id):
+        yield {"event": "step_start", "step_index": 0, "agent": "planner", "message": "Planning..."}
+        yield {
+            "event": "complete",
+            "state": {
+                "report": "Streamed Report",
+                "feedback": "Score: 9/10",
+                "verification_summary": "Verified",
+                "critic_score": 0.9,
+                "iteration_count": 1,
+                "tokens_used": 1200,
+                "sub_questions": ["Q1"],
+            },
+            "execution_time_seconds": 2.5,
+        }
+
+    with patch("api.routes_research.stream_research_pipeline", side_effect=fake_stream):
+        response = await client.post(
+            "/research/run-stream",
+            json={"topic": "Quantum Computing"},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        assert "text/event-stream" in response.headers.get("content-type", "")
+        content = response.text
+        assert "connected" in content
+        assert "complete" in content
+        assert "Streamed Report" in content

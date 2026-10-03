@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23FF7E29'/%3E%3Cpath d='M16 5.5L28 11.5L16 17.5L4 11.5Z' fill='%23FFFFFF'/%3E%3Cpath d='M7.5 14v4.5C7.5 21.8 11.2 24.5 16 24.5s8.5-2.7 8.5-6V14' fill='none' stroke='%23FFFFFF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M28 11.5v6.5' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='28' cy='19.5' r='1.4' fill='%23FFFFFF'/%3E%3Cpolygon points='16,8.8 18.2,11.5 16,14.2 13.8,11.5' fill='%23FF7E29'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260918_05">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261003_03">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body class="bg-dark text-light">
@@ -1166,7 +1166,7 @@
                                 </svg>
                             </div>
                             <span class="modal-brand-title">ResearchMind</span>
-                            <span class="modal-pipe-badge"><span class="pipe-dot"></span> Active Pipeline</span>
+                            <span class="modal-pipe-badge" id="modal-pipe-badge"><span class="pipe-dot" id="modal-pipe-dot"></span> <span id="modal-pipe-badge-text">Active Pipeline</span></span>
                         </div>
                         <div class="modal-timer-pill">
                             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--brand-orange)" stroke-width="2">
@@ -1225,7 +1225,7 @@
                                     <circle cx="12" cy="12" r="3"></circle>
                                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                                 </svg>
-                                <span class="telemetry-stream-text">Parallel MCP sub-agents querying Tavily, arXiv &amp; consensus bus</span>
+                                <span class="telemetry-stream-text" id="running-stream-subtext">Parallel MCP sub-agents querying Tavily, arXiv &amp; consensus bus</span>
                             </div>
                             <div class="telemetry-live-chip">
                                 <span class="pulse-chip-dot"></span> LIVE BUS
@@ -1748,6 +1748,6 @@
     </div>
 
     <!-- Application Script -->
-    <script src="/static/js/app.js?v=20260918_05"></script>
+    <script src="/static/js/app.js?v=20261003_03"></script>
 </body>
 </html>

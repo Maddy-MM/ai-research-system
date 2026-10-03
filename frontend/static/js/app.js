@@ -1370,6 +1370,9 @@
         runningTopicDisplay: document.getElementById('running-topic-display'),
         liveTimer: document.getElementById('live-timer'),
         runningStatusMessage: document.getElementById('running-status-message'),
+        runningStreamSubtext: document.getElementById('running-stream-subtext'),
+        modalPipeBadge: document.getElementById('modal-pipe-badge'),
+        modalPipeBadgeText: document.getElementById('modal-pipe-badge-text'),
 
         // Results Stage
         btnBackToSearch: document.getElementById('btn-back-to-search'),
@@ -2252,9 +2255,9 @@
         return { meta, markdown };
     }
 
-    async function handleMockPipeline(topic) {
-        // Start 20s mock simulation with 4s stage message interval
-        startRunningState(topic, 4000);
+    async function handleMockPipeline(topic, mode = 'loop_writer') {
+        // Start running modal without automatic arbitrary timer
+        startRunningState(topic, null);
 
         let reportText = '';
         let meta = {};
@@ -2274,8 +2277,83 @@
             reportText = '# Default Research Report\n\nSimulation completed successfully.';
         }
 
-        // Wait for exactly 20 seconds
-        await new Promise(resolve => setTimeout(resolve, 20000));
+        // --- Step 0: Planner ---
+        dom.runningStatusMessage.textContent = 'Planning focused research questions...';
+        if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Decomposing inquiry into targeted investigation tracks';
+        updateModalStepper(0);
+        await new Promise(resolve => setTimeout(resolve, 2400));
+
+        // --- Step 1: MCP Tools ---
+        dom.runningStatusMessage.textContent = 'Investigating 3 sub-questions in parallel...';
+        if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Parallel MCP sub-agents querying Tavily, arXiv & consensus bus';
+        updateModalStepper(1);
+        await new Promise(resolve => setTimeout(resolve, 3400));
+
+        // --- Step 2: Synthesizer ---
+        dom.runningStatusMessage.textContent = 'Synthesizing raw findings into draft report...';
+        if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Aggregating multi-source evidence and structuring sections';
+        updateModalStepper(2);
+        await new Promise(resolve => setTimeout(resolve, 3200));
+
+        // --- Step 3: Critic ---
+        dom.runningStatusMessage.textContent = 'Evaluating draft and routing revisions...';
+        if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Scoring technical rigor, clarity and citation integrity';
+        updateModalStepper(3);
+        await new Promise(resolve => setTimeout(resolve, 2600));
+
+        // --- Self-Correction Revision Loop (if requested or default) ---
+        if (mode === 'loop_planner') {
+            // Planner revision loop: Step 4 (Critic) ➔ Step 1 (Planner)
+            if (dom.modalPipeBadge) dom.modalPipeBadge.classList.add('revision-mode');
+            if (dom.modalPipeBadgeText) dom.modalPipeBadgeText.textContent = 'Loop 2/2 • Self-Correcting';
+            dom.runningStatusMessage.textContent = 'Critic score: 5.5/10 • Information gaps found ➔ Re-planning inquiry...';
+            if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Iterative self-correction triggered by Critic (missing_info)';
+            updateModalStepper(0, true, 3);
+            await new Promise(resolve => setTimeout(resolve, 3200));
+
+            // Re-research sub-questions
+            dom.runningStatusMessage.textContent = 'Gathering supplemental research data across arXiv & Tavily...';
+            if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Investigating gap-filling sub-questions in parallel';
+            updateModalStepper(1);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // Re-synthesizing
+            dom.runningStatusMessage.textContent = 'Re-synthesizing draft report with fresh findings...';
+            if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Incorporating supplemental literature and metrics';
+            updateModalStepper(2);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // Critic passes revised draft
+            if (dom.modalPipeBadge) dom.modalPipeBadge.classList.remove('revision-mode');
+            if (dom.modalPipeBadgeText) dom.modalPipeBadgeText.textContent = 'Active Pipeline';
+            dom.runningStatusMessage.textContent = 'Critic score: 9.4/10 • Rigor criteria fully satisfied';
+            if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Proceeding to independent verification stage';
+            updateModalStepper(3);
+            await new Promise(resolve => setTimeout(resolve, 2200));
+
+        } else if (mode === 'loop_writer' || mode === 'loop') {
+            // Writer revision loop: Step 4 (Critic) ➔ Step 3 (Synthesizer)
+            if (dom.modalPipeBadge) dom.modalPipeBadge.classList.add('revision-mode');
+            if (dom.modalPipeBadgeText) dom.modalPipeBadgeText.textContent = 'Loop 2/2 • Self-Correcting';
+            dom.runningStatusMessage.textContent = 'Critic score: 6.8/10 • Re-routing to Synthesizer for revision...';
+            if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Iterative self-correction triggered by Critic (unclear_writing)';
+            updateModalStepper(2, true, 3);
+            await new Promise(resolve => setTimeout(resolve, 3400));
+
+            // Back to Critic (Pass)
+            if (dom.modalPipeBadge) dom.modalPipeBadge.classList.remove('revision-mode');
+            if (dom.modalPipeBadgeText) dom.modalPipeBadgeText.textContent = 'Active Pipeline';
+            dom.runningStatusMessage.textContent = 'Critic score: 9.4/10 • Rigor criteria satisfied';
+            if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Proceeding to independent verification stage';
+            updateModalStepper(3);
+            await new Promise(resolve => setTimeout(resolve, 2200));
+        }
+
+        // --- Step 4: Verifier ---
+        dom.runningStatusMessage.textContent = 'Independently cross-verifying key claims...';
+        if (dom.runningStreamSubtext) dom.runningStreamSubtext.textContent = 'Running independent fact-checking against external sources';
+        updateModalStepper(4);
+        await new Promise(resolve => setTimeout(resolve, 2800));
 
         // Construct mock result payload matching live schema
         const mockData = {
@@ -2290,8 +2368,8 @@
                 'What are the current hardware roadmaps from Quantinuum, IBM, and Google Quantum AI for fault-tolerant logical qubits?'
             ],
             tokens_used: meta.tokens_used || 14820,
-            iteration_count: meta.iteration_count || 1,
-            execution_time_seconds: state.startTime ? Math.max(1, Math.round((Date.now() - state.startTime) / 1000)) : 20,
+            iteration_count: mode.startsWith('loop') ? 2 : 1,
+            execution_time_seconds: state.startTime ? Math.max(1, Math.round((Date.now() - state.startTime) / 1000)) : 21,
             agent_timings: meta.agent_timings || {
                 planner: 1.2,
                 researcher: 6.4,
@@ -2317,10 +2395,14 @@
             return;
         }
 
-        // Check for mock keyword with ambiguous test flag "- A" (case-insensitive, e.g. "Test - A", "dEmO - a", "demo-a", "default - a")
-        const mockAmbiguousMatch = topic.match(/^(default|demo|test)\s*-\s*a$/i);
+        const lower = topic.toLowerCase();
+
+        // 1. Ambiguity / Clarification Modal Demo (e.g. "demo - a", "test - a", "clarify")
+        const mockAmbiguousMatch = topic.match(/^(default|demo|test)\s*-\s*a$/i) || lower === 'clarify' || lower === 'demo:clarify';
         if (mockAmbiguousMatch) {
-            const baseWord = mockAmbiguousMatch[1].charAt(0).toUpperCase() + mockAmbiguousMatch[1].slice(1).toLowerCase();
+            const baseWord = (typeof mockAmbiguousMatch === 'object' && mockAmbiguousMatch[1])
+                ? mockAmbiguousMatch[1].charAt(0).toUpperCase() + mockAmbiguousMatch[1].slice(1).toLowerCase()
+                : 'Quantum Computing';
             const simulatedQuestion = `What specific dimension of ${baseWord} research should the multi-agent system investigate? For example: core theoretical foundations & mathematical formalisms, experimental benchmark metrics, real-world deployment challenges, or adversarial robustness & security models.`;
             
             // Brief 2.5s simulation: show running HUD with active neural canvas & stepper
@@ -2332,16 +2414,130 @@
             return;
         }
 
-        // Lightweight client-side simulation shortcuts (default, demo, test)
-        const MOCK_KEYWORDS = ['default', 'demo', 'test'];
-        if (MOCK_KEYWORDS.includes(topic.toLowerCase())) {
-            await handleMockPipeline(topic);
+        // 2. Loop to Planner Demo (e.g. "demo - lp", "test - lp", "loop - p", "demo:planner")
+        const mockLoopPlannerMatch = topic.match(/^(default|demo|test)\s*-\s*(lp|planner)$/i) || lower === 'loop:planner';
+        if (mockLoopPlannerMatch) {
+            await handleMockPipeline(topic, 'loop_planner');
             return;
         }
 
-        startRunningState(topic);
+        // 3. Loop to Synthesizer Demo (e.g. "demo - l", "test - l", "loop", "demo:loop")
+        const mockLoopWriterMatch = topic.match(/^(default|demo|test)\s*-\s*(l|loop|writer)$/i) || lower === 'loop' || lower === 'demo:loop';
+        if (mockLoopWriterMatch) {
+            await handleMockPipeline(topic, 'loop_writer');
+            return;
+        }
+
+        // 4. Straight Progression Demo without Loop (e.g. "demo - s", "test - s", "demo:fast")
+        const mockStraightMatch = topic.match(/^(default|demo|test)\s*-\s*(s|straight|fast)$/i);
+        if (mockStraightMatch) {
+            await handleMockPipeline(topic, 'straight');
+            return;
+        }
+
+        // 5. Default Mock Shortcuts ("demo", "test", "default") -> showcases the classy loop revision!
+        const MOCK_KEYWORDS = ['default', 'demo', 'test'];
+        if (MOCK_KEYWORDS.includes(lower)) {
+            await handleMockPipeline(topic, 'loop_writer');
+            return;
+        }
+
+        // Start running state without arbitrary fallback interval (real-time events will drive stepper)
+        startRunningState(topic, null);
 
         try {
+            // Attempt real-time SSE stream first
+            const sseSupported = typeof window.ReadableStream !== 'undefined';
+            if (sseSupported) {
+                const response = await fetch('/research/run-stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.token}`
+                    },
+                    body: JSON.stringify({ topic })
+                });
+
+                if (response.status === 401) {
+                    handleLogout();
+                    showLoginError('Session expired. Please sign in again.');
+                    return;
+                }
+
+                if (response.ok && response.body) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let buffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop(); // keep partial line
+
+                        for (const line of lines) {
+                            const trimmed = line.trim();
+                            if (!trimmed.startsWith('data:')) continue;
+                            const jsonStr = trimmed.replace(/^data:\s*/, '');
+                            if (!jsonStr) continue;
+
+                            try {
+                                const evt = JSON.parse(jsonStr);
+
+                                if (evt.event === 'step_start') {
+                                    if (dom.runningStatusMessage && evt.message) {
+                                        dom.runningStatusMessage.textContent = evt.message;
+                                    }
+                                    if (dom.runningStreamSubtext && evt.sub_message) {
+                                        dom.runningStreamSubtext.textContent = evt.sub_message;
+                                    }
+                                    if (typeof evt.step_index === 'number') {
+                                        updateModalStepper(evt.step_index);
+                                    }
+                                } else if (evt.event === 'loop_revision') {
+                                    // Classy Loop Revision Event!
+                                    if (dom.modalPipeBadge) dom.modalPipeBadge.classList.add('revision-mode');
+                                    if (dom.modalPipeBadgeText) {
+                                        dom.modalPipeBadgeText.textContent = `Loop ${evt.iteration + 1} • Self-Correcting`;
+                                    }
+                                    if (dom.runningStatusMessage && evt.message) {
+                                        dom.runningStatusMessage.textContent = evt.message;
+                                    }
+                                    if (dom.runningStreamSubtext && evt.sub_message) {
+                                        dom.runningStreamSubtext.textContent = evt.sub_message;
+                                    }
+                                    updateModalStepper(evt.to_step, true, evt.from_step);
+                                } else if (evt.event === 'clarification_needed') {
+                                    openClarifyModal(topic, evt.clarifying_question);
+                                    return;
+                                } else if (evt.event === 'error') {
+                                    throw new Error(evt.error || 'Pipeline execution failed.');
+                                } else if (evt.event === 'complete') {
+                                    const data = evt.data;
+                                    const clientElapsed = state.startTime ? Math.max(1, Math.round((Date.now() - state.startTime) / 1000)) : null;
+                                    data.execution_time_seconds = data.execution_time_seconds || clientElapsed;
+
+                                    state.currentResults = data;
+                                    saveToHistory(topic, data);
+                                    renderResults(data);
+                                    showResultsStage();
+                                    requestAnimationFrame(() => {
+                                        stopRunningState(true);
+                                    });
+                                    return;
+                                }
+                            } catch (parseErr) {
+                                console.warn('SSE event parse warning:', parseErr);
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+
+            // Fallback to standard endpoint if streaming endpoint encounters any issue
             const res = await fetch('/research/run', {
                 method: 'POST',
                 headers: {
@@ -2363,7 +2559,6 @@
                 throw new Error(data.detail || 'Pipeline execution failed.');
             }
 
-            // If the planner identified topic ambiguity, morph the modal in-place to the clarification view
             if (data.clarifying_question) {
                 state.currentResults = data;
                 renderResults(data);
@@ -2371,11 +2566,9 @@
                 return;
             }
 
-            // Record pipeline execution elapsed time
             const clientElapsed = state.startTime ? Math.max(1, Math.round((Date.now() - state.startTime) / 1000)) : null;
             data.execution_time_seconds = data.execution_time_seconds || clientElapsed;
 
-            // Save to state and history
             state.currentResults = data;
             saveToHistory(topic, data);
             renderResults(data);
@@ -2425,17 +2618,8 @@
             dom.runningViewProgress.classList.remove('hidden');
         }
 
-        // Start running state inside the already open modal
-        startRunningState(refinedTopic, isMockKeyword ? 4000 : (isMockAmbiguous ? 2500 : 14000));
-
-        // Delegate to appropriate research handler
-        if (isMockAmbiguous) {
-            await executeResearch(refinedTopic);
-        } else if (isMockKeyword) {
-            await handleMockPipeline(refinedTopic);
-        } else {
-            await executeResearch(refinedTopic);
-        }
+        // Delegate to executeResearch which handles all case-insensitive demos & modes uniformly
+        await executeResearch(refinedTopic);
     }
 
     async function handleClarifyInlineSubmit() {
@@ -2453,11 +2637,76 @@
         await executeResearch(refinedTopic);
     }
 
-    function updateModalStepper(stepIndex) {
+    let loopAnimationTimeout = null;
+
+    function updateModalStepper(stepIndex, isLoop = false, loopSourceStep = null) {
         const stepper = document.getElementById('modal-pipeline-stepper');
         if (!stepper) return;
         const steps = stepper.querySelectorAll('.stepper-step');
+        const tracks = stepper.querySelectorAll('.stepper-track-fill');
+
+        if (loopAnimationTimeout) {
+            clearTimeout(loopAnimationTimeout);
+            loopAnimationTimeout = null;
+        }
+
+        if (isLoop && loopSourceStep !== null) {
+            // Classy Loop Transition:
+            // 1. Highlight source step (e.g. Critic, 3) in glowing violet/purple
+            // 2. Pulse target step (e.g. Synthesizer, 2 or Planner, 0)
+            // 3. Smoothly animate intermediate tracks in reverse
+            steps.forEach((stepEl, idx) => {
+                stepEl.classList.remove('loop-source', 'loop-target');
+                if (idx === loopSourceStep) {
+                    stepEl.classList.add('loop-source');
+                } else if (idx === stepIndex) {
+                    stepEl.classList.add('loop-target');
+                }
+            });
+
+            // Rewind track fills smoothly
+            tracks.forEach((trackEl, idx) => {
+                if (idx >= stepIndex && idx < loopSourceStep) {
+                    trackEl.classList.add('rewind');
+                    trackEl.style.width = '15%';
+                }
+            });
+
+            loopAnimationTimeout = setTimeout(() => {
+                // Settle into new active step
+                steps.forEach((stepEl, idx) => {
+                    stepEl.classList.remove('loop-source', 'loop-target');
+                    if (idx === stepIndex) {
+                        stepEl.classList.add('active');
+                        stepEl.classList.remove('completed');
+                    } else if (idx < stepIndex) {
+                        stepEl.classList.remove('active');
+                        stepEl.classList.add('completed');
+                    } else {
+                        stepEl.classList.remove('active');
+                        stepEl.classList.remove('completed');
+                    }
+                });
+
+                tracks.forEach((trackEl, idx) => {
+                    trackEl.classList.remove('rewind');
+                    if (idx < stepIndex) {
+                        trackEl.style.width = '100%';
+                    } else if (idx === stepIndex) {
+                        trackEl.style.width = '45%';
+                    } else {
+                        trackEl.style.width = '0%';
+                    }
+                });
+                loopAnimationTimeout = null;
+            }, 650);
+
+            return;
+        }
+
+        // Standard forward progression
         steps.forEach((stepEl, idx) => {
+            stepEl.classList.remove('loop-source', 'loop-target');
             if (idx === stepIndex) {
                 stepEl.classList.add('active');
                 stepEl.classList.remove('completed');
@@ -2470,8 +2719,8 @@
             }
         });
 
-        const tracks = stepper.querySelectorAll('.stepper-track-fill');
         tracks.forEach((trackEl, idx) => {
+            trackEl.classList.remove('rewind');
             if (idx < stepIndex) {
                 trackEl.style.width = '100%';
             } else if (idx === stepIndex) {
@@ -2489,6 +2738,10 @@
             clearTimeout(fadeOutTimeout);
             fadeOutTimeout = null;
         }
+        if (loopAnimationTimeout) {
+            clearTimeout(loopAnimationTimeout);
+            loopAnimationTimeout = null;
+        }
         state.running = true;
         if (dom.runningModal) {
             dom.runningModal.classList.remove('modal-fade-out');
@@ -2499,6 +2752,15 @@
         }
         if (dom.runningViewProgress) {
             dom.runningViewProgress.classList.remove('hidden');
+        }
+        if (dom.modalPipeBadge) {
+            dom.modalPipeBadge.classList.remove('revision-mode');
+        }
+        if (dom.modalPipeBadgeText) {
+            dom.modalPipeBadgeText.textContent = 'Active Pipeline';
+        }
+        if (dom.runningStreamSubtext) {
+            dom.runningStreamSubtext.textContent = 'Parallel MCP sub-agents querying Tavily, arXiv & consensus bus';
         }
         dom.runningTopicDisplay.textContent = `"${topic}"`;
         dom.liveTimer.textContent = '00:00';
@@ -2517,13 +2779,16 @@
             dom.liveTimer.textContent = `${m}:${s}`;
         }, 1000);
 
+        // Fallback interval if live SSE is not supported or during mock testing
         let step = 0;
         clearInterval(state.statusInterval);
-        state.statusInterval = setInterval(() => {
-            step = (step + 1) % SPINNER_MESSAGES.length;
-            dom.runningStatusMessage.textContent = SPINNER_MESSAGES[step];
-            updateModalStepper(step);
-        }, statusIntervalMs);
+        if (statusIntervalMs) {
+            state.statusInterval = setInterval(() => {
+                step = (step + 1) % SPINNER_MESSAGES.length;
+                dom.runningStatusMessage.textContent = SPINNER_MESSAGES[step];
+                updateModalStepper(step);
+            }, statusIntervalMs);
+        }
         updateSidebarVisibilityForModals();
     }
 
@@ -2534,6 +2799,17 @@
         if (fadeOutTimeout) {
             clearTimeout(fadeOutTimeout);
             fadeOutTimeout = null;
+        }
+        if (loopAnimationTimeout) {
+            clearTimeout(loopAnimationTimeout);
+            loopAnimationTimeout = null;
+        }
+
+        if (dom.modalPipeBadge) {
+            dom.modalPipeBadge.classList.remove('revision-mode');
+        }
+        if (dom.modalPipeBadgeText) {
+            dom.modalPipeBadgeText.textContent = 'Active Pipeline';
         }
 
         if (smoothFade && dom.runningModal) {
@@ -2551,7 +2827,12 @@
                 const stepper = document.getElementById('modal-pipeline-stepper');
                 if (stepper) {
                     const tracks = stepper.querySelectorAll('.stepper-track-fill');
-                    tracks.forEach(trackEl => { trackEl.style.width = '0%'; });
+                    tracks.forEach(trackEl => { 
+                        trackEl.classList.remove('rewind');
+                        trackEl.style.width = '0%'; 
+                    });
+                    const steps = stepper.querySelectorAll('.stepper-step');
+                    steps.forEach(stepEl => stepEl.classList.remove('loop-source', 'loop-target'));
                 }
                 fadeOutTimeout = null;
                 updateSidebarVisibilityForModals();
@@ -2568,7 +2849,12 @@
             const stepper = document.getElementById('modal-pipeline-stepper');
             if (stepper) {
                 const tracks = stepper.querySelectorAll('.stepper-track-fill');
-                tracks.forEach(trackEl => { trackEl.style.width = '0%'; });
+                tracks.forEach(trackEl => { 
+                    trackEl.classList.remove('rewind');
+                    trackEl.style.width = '0%'; 
+                });
+                const steps = stepper.querySelectorAll('.stepper-step');
+                steps.forEach(stepEl => stepEl.classList.remove('loop-source', 'loop-target'));
             }
             updateSidebarVisibilityForModals();
         }

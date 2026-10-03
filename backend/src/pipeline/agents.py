@@ -125,7 +125,12 @@ critic_prompt = ChatPromptTemplate.from_messages(
 Report:
 {report}
 
-Score it from 0.0 to 1.0. Set issue_type to the ONE label that best describes the report's
+Score it from 0.0 to 1.0. Calibrate your score rigorously:
+- 0.80 to 1.0: Publication-ready. Comprehensive coverage, crisp structure, deep insights, and grounded citations.
+- 0.60 to 0.79: Promising draft, but has noticeable gaps in depth, unsupported assertions, or structural weaknesses that need revision.
+- Below 0.60: Superficial, incoherent, or missing critical sections.
+
+Set issue_type to the ONE label that best describes the report's
 biggest weakness: 'missing_info' (gaps in coverage — needs more research), 'unclear_writing'
 (structure/clarity problems — needs a rewrite), 'unsupported_claims' (claims without grounding —
 needs a rewrite), or 'none' if there's no significant issue.""",
